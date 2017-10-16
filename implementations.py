@@ -82,3 +82,9 @@ def polynomial_enhancement(x, deg):
     stacked_x = np.tile(x, deg+1)
     power_vec = np.repeat(np.array(range(deg+1)), x.shape[1])
     return stacked_x ** power_vec
+
+def pseudo_least_squares(y, x):
+    U, S, V = np.linalg.svd(x, full_matrices=False)
+    w = V.T @ np.diag(1/S) @ U.T @ y
+    loss = imp.mse(y, x, w)
+    return (w, loss)
