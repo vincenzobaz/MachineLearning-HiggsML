@@ -16,6 +16,8 @@ def gradient(y, tx, w):
 
 # TODO: Ask if we can add named optional parametrs
 # to avoid this and being able to switch functions
+
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma,
                      compute_loss=mse, compute_gradient=gradient):
     iter_n = 0
@@ -78,13 +80,61 @@ def ridge_regression(y, tx, lambda_, compute_loss=rmse):
                       np.identity(tx.shape[1])) @ tx.T @ y
     return w, compute_loss(y, tx, w)
 
+
 def polynomial_enhancement(x, deg):
-    stacked_x = np.tile(x, deg+1)
-    power_vec = np.repeat(np.array(range(deg+1)), x.shape[1])
+    stacked_x = np.tile(x, deg + 1)
+    power_vec = np.repeat(np.array(range(deg + 1)), x.shape[1])
     return stacked_x ** power_vec
 
-def pseudo_least_squares(y, x):
-    U, S, V = np.linalg.svd(x, full_matrices=False)
-    w = V.T @ np.diag(1/S) @ U.T @ y
-    loss = imp.mse(y, x, w)
-    return (w, loss)
+
+def pseudo_least_squares(y, tx, compute_loss=mse):
+    U, S, V = np.linalg.svd(tx, full_matrices=False)
+    w = V.T @ np.diag(1 / S) @ U.T @ y
+    loss = compute_loss(y, tx, w)
+    return w, loss
+
+
+def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rmse):
+    """
+    Computes weights, training and testing error
+
+    regression_f is a regressiong function only accepting y and the tx matrix.
+    In case of ridge regression (or any other function needing more paremeters),
+    the additional ones can be curried.
+    e.g. f = lambda y, tx: ridge_regression(y, tx, lambda_, compute_loss=...)
+    """
+
+    def build_k_indices():
+        """build k indices for k-fold."""
+        num_row = y.shape[0]
+        interval = int(num_row / k_fold)
+        np.random.seed(seed)
+        indices = np.random.permutation(num_row)
+        k_indices = [indices[k * interval: (k + 1) * interval]
+                     for k in range(k_fold)]
+        return np.array(k_indices)
+
+    k_indices = build_k_indices()
+
+    def cross_validation_step(k):
+        """Computes one iteration of k-fold cross validation"""
+        test_x, test_y = x[k_indices[k]], y[k_indices[k]]
+        train_indices = k_indices[[i for i in range(len(k_indices)) if i != k]]
+        train_indices = np.ravel(train_indices)
+        tx = polynomial_enhancement(x[train_indices], degree)
+        w, loss_tr = regression_f(y[train_indices], tx)
+        loss_te = compute_loss(
+            test_y, polynomial_enhancement(test_x, degree), w)
+        return loss_tr, loss_te, w
+
+    loss_tr = 0
+    loss_te = 0
+    weigths = np.zeros(degree + 1)  # if quadratic, three parameters....
+
+    for i in range(k_fold):
+        tmp_loss_tr, tmp_loss_te, w = cross_validation_step(i)
+        loss_tr += tmp_loss_tr
+        loss_te += tmp_loss_te
+        weigths += w
+
+    return loss_tr / k_fold, loss_te / k_fold, weigths / k_fold
