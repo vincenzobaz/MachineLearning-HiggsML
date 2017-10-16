@@ -77,3 +77,8 @@ def ridge_regression(y, tx, lambda_, compute_loss=rmse):
     w = np.linalg.inv(tx.T @ tx + lambda_p *
                       np.identity(tx.shape[1])) @ tx.T @ y
     return w, compute_loss(y, tx, w)
+
+def polynomial_enhancement(x, deg):
+    stacked_x = np.tile(x, deg+1)
+    power_vec = np.repeat(np.array(range(deg+1)), x.shape[1])
+    return stacked_x ** power_vec
