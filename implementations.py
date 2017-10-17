@@ -129,7 +129,7 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
 
     loss_tr = 0
     loss_te = 0
-    weigths = np.zeros(degree + 1)  # if quadratic, three parameters....
+    weigths = np.zeros((degree + 1) * x.shape[1])  # if quadratic, three parameters....
 
     for i in range(k_fold):
         tmp_loss_tr, tmp_loss_te, w = cross_validation_step(i)
