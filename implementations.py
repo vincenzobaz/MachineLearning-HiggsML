@@ -228,7 +228,7 @@ def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
 
     w = np.zeros((tx.shape[1], 1))
     prev_loss = 0
-    next_loss = -1 
+    next_loss = np.inf
     n_iter = 0
 
     while(n_iter < max_iter and np.abs(prev_loss - next_loss) >= threshold):
