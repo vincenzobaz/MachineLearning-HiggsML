@@ -192,3 +192,49 @@ def cross_validation_v2(y, x, k_fold, regression_f, degree, seed=1, compute_loss
         weigths.append(w)
 
     return accuracy, loss_tr, loss_te, weigths
+
+def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
+    def sigmoid(t): 
+        return np.exp(t) / (1 + np.exp(t))
+
+    def compute_loss(w):
+        txw = tx @ w
+        return np.sum(np.log(1 + np.exp(txw)) - y @ txw.T)
+
+    def compute_gradient(w):
+        return tx.T @ (sigmoid(tx @ w) - y)
+
+    def compute_hessian(w):
+        tmp = sigmoid(tx @ w)
+        S = np.diagflat(tmp * (1 - tmp))
+        return tx.T @ S @ tx
+
+    def armijo_step(grad, w, tests=1000):
+        d = grad / np.linalg.norm(grad)
+        etas = np.linspace(0, 1, tests+1)[1:]
+        r = np.linalg.norm(tx @ (np.tile(w, tests) + np.outer(d, etas)), axis=0)
+        return etas[np.argmin(r)]
+
+    def newton_step(w):
+        loss = compute_loss(w)
+        grad = compute_gradient(w)
+        hess = compute_hessian(w)
+        # TODO: Not sure that regularizer is compatible with amijo
+        regularizer = lambda_ * np.linalg.norm(w) if lambda_ is not None else 0
+
+        w = w - armijo_step(grad, w) * np.linalg.inv(hess) @ grad + regularizer
+
+        return loss, w
+
+    w = np.zeros((tx.shape[1], 1))
+    prev_loss = 0
+    next_loss = -1 
+    n_iter = 0
+
+    while(n_iter < max_iter and np.abs(prev_loss - next_loss) >= threshold):
+        prev_loss = next_loss
+        next_loss, w = newton_step(w)
+        print("Current iteration={i}, the loss={l}".format(i=n_iter, l=next_loss))
+        n_iter += 1
+
+    return next_loss, w
