@@ -195,9 +195,11 @@ def cross_validation_v2(y, x, k_fold, regression_f, degree, seed=1, compute_loss
 
 def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
     def sigmoid(t): 
+        """Logistic function"""
         return np.exp(t) / (1 + np.exp(t))
 
     def compute_loss(w):
+        """Computes loss using log-likelihood"""
         txw = tx @ w
         return np.sum(np.log(1 + np.exp(txw)) - y @ txw.T)
 
@@ -210,12 +212,19 @@ def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
         return tx.T @ S @ tx
 
     def armijo_step(grad, w, tests=1000):
-        d = grad / np.linalg.norm(grad)
-        etas = np.linspace(0, 1, tests+1)[1:]
+        """
+        Provides best learning step for the current iteration of newton's method
+        using Armijo's rule performing linear search to minimize function
+        phi(eta) = f(w + eta * d)
+        """
+        d = grad / np.linalg.norm(grad) # Compute direction vector
+        etas = np.linspace(0, 1, tests+1)[1:] # Learning rates to test
+        # Compute for each learning rate, the "length" of move, to minimize.
         r = np.linalg.norm(tx @ (np.tile(w, tests) + np.outer(d, etas)), axis=0)
-        return etas[np.argmin(r)]
+        return etas[np.argmin(r)] # Take etas that minimizes phi
 
     def newton_step(w):
+        """Performs one iteration of Newton's method"""
         loss = compute_loss(w)
         grad = compute_gradient(w)
         hess = compute_hessian(w)
@@ -223,7 +232,6 @@ def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
         regularizer = lambda_ * np.linalg.norm(w) if lambda_ is not None else 0
 
         w = w - armijo_step(grad, w) * np.linalg.inv(hess) @ grad + regularizer
-
         return loss, w
 
     w = np.zeros((tx.shape[1], 1))
