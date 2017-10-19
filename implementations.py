@@ -1,5 +1,5 @@
 import numpy as np
-import proj1_helpers as helper
+import scripts.proj1_helpers as helper
 
 
 def mse(y, tx, w):
@@ -83,9 +83,9 @@ def ridge_regression(y, tx, lambda_, compute_loss=rmse):
 
 
 def polynomial_enhancement(x, deg):
-    stacked_x = np.tile(x, deg + 1)
-    power_vec = np.repeat(np.array(range(deg + 1)), x.shape[1])
-    return stacked_x ** power_vec
+    stacked_x = np.tile(x, deg)
+    power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
+    return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
 
 
 def pseudo_least_squares(y, tx, compute_loss=mse):
@@ -193,10 +193,14 @@ def cross_validation_v2(y, x, k_fold, regression_f, degree, seed=1, compute_loss
 
     return accuracy, loss_tr, loss_te, weigths
 
-def logistic_regression(y, tx, max_iter, threshold, lambda_=None):
-    def sigmoid(t): 
+def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
+
+    tx = np.hstack((np.ones((tx_data.shape[0], 1)), tx_data))
+    y = np.reshape(y, (len(y), 1))
+
+    def sigmoid(t):
         """Logistic function"""
-        return np.exp(t) / (1 + np.exp(t))
+        return np.power(1 + np.exp(-t), -1)
 
     def compute_loss(w):
         """Computes loss using log-likelihood"""
