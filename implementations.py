@@ -205,7 +205,7 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
     def compute_loss(w):
         """Computes loss using log-likelihood"""
         txw = tx @ w
-        return np.sum(np.log(1 + np.exp(txw)) - y @ txw.T)
+        return np.sum(np.log(1 + np.exp(txw)) - y * txw)
 
     def compute_gradient(w):
         return tx.T @ (sigmoid(tx @ w) - y)
@@ -215,7 +215,7 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         S = np.diagflat(tmp * (1 - tmp))
         return tx.T @ S @ tx
 
-    def armijo_step(grad, w, tests=1000):
+    def armijo_step(grad, w, tests=10000):
         """
         Provides best learning step for the current iteration of newton's method
         using Armijo's rule performing linear search to minimize function
@@ -233,9 +233,10 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         grad = compute_gradient(w)
         hess = compute_hessian(w)
         # TODO: Not sure that regularizer is compatible with amijo
-        regularizer = lambda_ * np.linalg.norm(w) if lambda_ is not None else 0
+        regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
 
         w = w - armijo_step(grad, w) * np.linalg.inv(hess) @ grad + regularizer
+        #w = w - 0.01 * np.linalg.inv(hess) @ grad + regularizer
         return loss, w
 
     w = np.zeros((tx.shape[1], 1))
@@ -250,3 +251,4 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         n_iter += 1
 
     return next_loss, w
+
