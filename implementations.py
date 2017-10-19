@@ -124,52 +124,6 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
         train_indices = np.ravel(train_indices)
         tx = polynomial_enhancement(x[train_indices], degree)
         w, loss_tr = regression_f(y[train_indices], tx)
-        loss_te = compute_loss(
-            test_y, polynomial_enhancement(test_x, degree), w)
-        return loss_tr, loss_te, w
-
-    loss_tr = 0
-    loss_te = 0
-    weigths = np.zeros((degree + 1) * x.shape[1])  # if quadratic, three parameters....
-    print(weigths.shape)
-
-    for i in range(k_fold):
-        tmp_loss_tr, tmp_loss_te, w = cross_validation_step(i)
-        loss_tr += tmp_loss_tr
-        loss_te += tmp_loss_te
-        weigths += w
-
-    return loss_tr / k_fold, loss_te / k_fold, weigths / k_fold
-
-def cross_validation_v2(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rmse):
-    """
-    Computes weights, training and testing error
-
-    regression_f is a regressiong function only accepting y and the tx matrix.
-    In case of ridge regression (or any other function needing more paremeters),
-    the additional ones can be curried.
-    e.g. f = lambda y, tx: ridge_regression(y, tx, lambda_, compute_loss=...)
-    """
-
-    def build_k_indices():
-        """build k indices for k-fold."""
-        num_row = y.shape[0]
-        interval = int(num_row / k_fold)
-        np.random.seed(seed)
-        indices = np.random.permutation(num_row)
-        k_indices = [indices[k * interval: (k + 1) * interval]
-                     for k in range(k_fold)]
-        return np.array(k_indices)
-
-    k_indices = build_k_indices()
-
-    def cross_validation_step(k):
-        """Computes one iteration of k-fold cross validation"""
-        test_x, test_y = x[k_indices[k]], y[k_indices[k]]
-        train_indices = k_indices[[i for i in range(len(k_indices)) if i != k]]
-        train_indices = np.ravel(train_indices)
-        tx = polynomial_enhancement(x[train_indices], degree)
-        w, loss_tr = regression_f(y[train_indices], tx)
 
         empirical_y_test = helper.predict_labels(w, polynomial_enhancement(test_x, degree))
         sum_vector = (empirical_y_test + test_y)
@@ -193,29 +147,29 @@ def cross_validation_v2(y, x, k_fold, regression_f, degree, seed=1, compute_loss
 
     return accuracy, loss_tr, loss_te, weigths
 
-def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
+def stochastic_logistic_regression(y, tx_data, max_iter, batch_size, threshold, lambda_=None):
 
     tx = np.hstack((np.ones((tx_data.shape[0], 1)), tx_data))
     y = np.reshape(y, (len(y), 1))
 
     def sigmoid(t):
         """Logistic function"""
-        return np.power(1 + np.exp(-t), -1)
+        return np.power(np.exp(-t) + 1, -1)
 
-    def compute_loss(w):
+    def compute_loss(y, tx, w):
         """Computes loss using log-likelihood"""
         txw = tx @ w
         return np.sum(np.log(1 + np.exp(txw)) - y * txw)
 
-    def compute_gradient(w):
+    def compute_gradient(y, tx, w):
         return tx.T @ (sigmoid(tx @ w) - y)
 
-    def compute_hessian(w):
+    def compute_hessian(tx, w):
         tmp = sigmoid(tx @ w)
         S = np.diagflat(tmp * (1 - tmp))
         return tx.T @ S @ tx
 
-    def armijo_step(grad, w, tests=10000):
+    def armijo_step(grad, w, tx, tests=1000):
         """
         Provides best learning step for the current iteration of newton's method
         using Armijo's rule performing linear search to minimize function
@@ -227,28 +181,38 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         r = np.linalg.norm(tx @ (np.tile(w, tests) + np.outer(d, etas)), axis=0)
         return etas[np.argmin(r)] # Take etas that minimizes phi
 
-    def newton_step(w):
+    def newton_step(y, tx, w):
         """Performs one iteration of Newton's method"""
-        loss = compute_loss(w)
-        grad = compute_gradient(w)
-        hess = compute_hessian(w)
+        loss = compute_loss(y, tx, w)
+        grad = compute_gradient(y, tx, w)
+        hess = compute_hessian(tx, w)
         # TODO: Not sure that regularizer is compatible with amijo
         regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
 
         w = w - armijo_step(grad, w) * np.linalg.inv(hess) @ grad + regularizer
-        #w = w - 0.01 * np.linalg.inv(hess) @ grad + regularizer
         return loss, w
 
     w = np.zeros((tx.shape[1], 1))
     prev_loss = 0
     next_loss = np.inf
     n_iter = 0
+    losses = []
 
-    while(n_iter < max_iter and np.abs(prev_loss - next_loss) >= threshold):
+    for batch_y, batch_x in batch_iter(y, tx, batch_size, num_batches=max_iter):
         prev_loss = next_loss
-        next_loss, w = newton_step(w)
-        print("Current iteration={i}, the loss={l}".format(i=n_iter, l=next_loss))
+        gradient = compute_gradient(batch_y, batch_x, w)
+        #hess = compute_hessian(batch_x, w)
+        regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
+        next_loss = compute_loss(batch_y, batch_x, w)
+        #w = w - 0.001 * np.linalg.inv(hess) @ gradient + regularizer
+        #w = w - armijo_step(gradient, w, batch_x) * np.linalg.pinv(hess) @ gradient + regularizer
+        #w = w - armijo_step(gradient, w, batch_x) * gradient + regularizer
+        w -= 0.001 * gradient + regularizer
         n_iter += 1
+        print("Current iteration={i}, the loss={l}".format(i=n_iter, l=next_loss))
+        if np.abs(prev_loss - next_loss) < threshold:
+            break
+        losses.append(next_loss)
 
-    return next_loss, w
+    return next_loss, w, losses
 
