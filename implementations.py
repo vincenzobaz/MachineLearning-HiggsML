@@ -147,7 +147,7 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
 
     return accuracy, loss_tr, loss_te, weigths
 
-def stochastic_logistic_regression(y, tx_data, max_iter, batch_size, threshold, lambda_=None):
+def stochastic_logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
 
     tx = np.hstack((np.ones((tx_data.shape[0], 1)), tx_data))
     y = np.reshape(y, (len(y), 1))
@@ -166,8 +166,9 @@ def stochastic_logistic_regression(y, tx_data, max_iter, batch_size, threshold, 
 
     def compute_hessian(tx, w):
         tmp = sigmoid(tx @ w)
-        S = np.diagflat(tmp * (1 - tmp))
-        return tx.T @ S @ tx
+        S = tmp * (1 - tmp)
+        # diagflat S => memory error. Simulate same behavior with following line
+        return np.multiply(tx.T, S.T) @ tx
 
     def armijo_step(grad, w, tx, tests=1000):
         """
@@ -189,30 +190,21 @@ def stochastic_logistic_regression(y, tx_data, max_iter, batch_size, threshold, 
         # TODO: Not sure that regularizer is compatible with amijo
         regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
 
-        w = w - armijo_step(grad, w) * np.linalg.inv(hess) @ grad + regularizer
+        w = w - armijo_step(grad, w, tx) * np.linalg.inv(hess) @ grad + regularizer
         return loss, w
 
     w = np.zeros((tx.shape[1], 1))
     prev_loss = 0
     next_loss = np.inf
-    n_iter = 0
     losses = []
 
-    for batch_y, batch_x in batch_iter(y, tx, batch_size, num_batches=max_iter):
+    for i in range(max_iter):
         prev_loss = next_loss
-        gradient = compute_gradient(batch_y, batch_x, w)
-        #hess = compute_hessian(batch_x, w)
-        regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
-        next_loss = compute_loss(batch_y, batch_x, w)
-        #w = w - 0.001 * np.linalg.inv(hess) @ gradient + regularizer
-        #w = w - armijo_step(gradient, w, batch_x) * np.linalg.pinv(hess) @ gradient + regularizer
-        #w = w - armijo_step(gradient, w, batch_x) * gradient + regularizer
-        w -= 0.001 * gradient + regularizer
-        n_iter += 1
-        print("Current iteration={i}, the loss={l}".format(i=n_iter, l=next_loss))
+        next_loss, w = newton_step(y, tx, w)
         if np.abs(prev_loss - next_loss) < threshold:
             break
         losses.append(next_loss)
 
+        print("Current iteration={i}, the loss={l}".format(i=i, l=next_loss))
     return next_loss, w, losses
 
