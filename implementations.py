@@ -147,18 +147,27 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
 
     return accuracy, loss_tr, loss_te, weigths
 
+
+def sigmoid(t):
+    """Logistic function"""
+    a = np.where(t < 0)
+    b = np.where(t >= 0)
+    t[a] = np.exp(t[a]) / (1 + np.exp(t[a]))
+    t[b] = np.power(np.exp(-t[b]) + 1, -1)
+    return t
+
+
+def logistic_predict_labels(w, x_test):
+    probs = imp.sigmoid(x_test @ w)
+    probs[probs >= 0.5] = 1
+    probs[probs < 0.5] = -1
+    return probs
+
+
 def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
 
     tx = np.hstack((np.ones((tx_data.shape[0], 1)), tx_data))
     y = np.reshape(y, (len(y), 1))
-
-    def sigmoid(t):
-        """Logistic function"""
-        a = np.where(t < 0)
-        b = np.where(t >= 0)
-        t[a] = np.exp(t[a]) / (1 + np.exp(t[a]))
-        t[b] = np.power(np.exp(-t[b]) + 1, -1)
-        return t
 
     def compute_loss(y, tx, w):
         """Computes loss using log-likelihood"""
