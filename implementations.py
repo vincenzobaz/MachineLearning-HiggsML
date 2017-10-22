@@ -266,6 +266,6 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         #losses.append(next_loss)
 
         #print("Current iteration={i}, the loss={l}".format(i=i, l=next_loss))
-    print('Completed logistic regression with loss', next_loss))
+    print('Completed logistic regression with loss', next_loss)
     return next_loss, w, losses
 
