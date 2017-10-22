@@ -110,14 +110,14 @@ def standardize(x):
     return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
-def train_predict_logistic(y_train, x_train, x_test):
+def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
     cat_col = 22
     PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
     for num in PRI_jet_nums:
-        cat_indices_tr = np.where(x_train[:, cat_col] == num)
 
+        cat_indices_tr = np.where(x_train[:, cat_col] == num)
         x_train_cat = x_train[cat_indices_tr]
         x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
 
@@ -129,13 +129,14 @@ def train_predict_logistic(y_train, x_train, x_test):
 
         loss, w, _ = logistic_regression(y_train[cat_indices_tr],
                                          x_train_cat,
-                                         max_iter=100,
-                                         threshold=10**(-4))
+                                         max_iter=max_iter,
+                                         threshold=threshold)
 
         cat_indices_te = np.where(x_test[:, cat_col] == num)
         x_test_cat = x_test[cat_indices_te]
         x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
         x_test_cat = np.delete(x_test_cat, deleted_cols_ids, axis=1)
+        mean_spec(x_test_cat)
         x_test_cat = standardize(x_test_cat)
 
         x_test_cat = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
@@ -181,14 +182,15 @@ def logistic_cross_validation(y, x, k_fold, seed=1):
 
         return accuracy
 
-    loss_tr = []
-    loss_te = []
-    weigths = []  # if quadratic, three parameters....
+    #loss_tr = []
+    #loss_te = []
+    #weigths = []  # if quadratic, three parameters....
     accuracy = []
 
     for i in range(k_fold):
         tmp_accuracy = cross_validation_step(i)
         accuracy.append(tmp_accuracy)
+        print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
 
@@ -261,8 +263,9 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         next_loss, w = newton_step(y, tx, w)
         if np.abs(prev_loss - next_loss) < threshold:
             break
-        losses.append(next_loss)
+        #losses.append(next_loss)
 
-        print("Current iteration={i}, the loss={l}".format(i=i, l=next_loss))
+        #print("Current iteration={i}, the loss={l}".format(i=i, l=next_loss))
+    print('Completed logistic regression with loss', next_loss))
     return next_loss, w, losses
 
