@@ -158,7 +158,7 @@ def sigmoid(t):
 
 
 def logistic_predict_labels(w, x_test):
-    probs = imp.sigmoid(x_test @ w)
+    probs = sigmoid(x_test @ w)
     probs[probs >= 0.5] = 1
     probs[probs < 0.5] = -1
     return probs
