@@ -220,10 +220,10 @@ def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train
 
 def sigmoid(t):
     """Logistic function"""
-    a = np.where(t < 0)
-    b = np.where(t >= 0)
-    t[a] = np.exp(t[a]) / (1 + np.exp(t[a]))
-    t[b] = np.power(np.exp(-t[b]) + 1, -1)
+    negative_ids = np.where(t < 0)
+    positive_ids = np.where(t >= 0)
+    t[negative_ids] = np.exp(t[negative_ids]) / (1 + np.exp(t[negative_ids]))
+    t[positive_ids] = np.power(np.exp(-t[positive_ids]) + 1, -1)
     return t
 
 
@@ -270,6 +270,10 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         loss = compute_loss(y, tx, w)
         grad = compute_gradient(y, tx, w)
         hess = compute_hessian(tx, w)
+        
+        #tt = np.tril(hess)
+        #tt = np.linalg.norm(np.identity(tt.shape) - np.linalg(tt) @ hess)
+        #print('Iteration matrix norm =', tt)
         # TODO: Not sure that regularizer is compatible with amijo
         regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
 
