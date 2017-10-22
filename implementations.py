@@ -95,7 +95,57 @@ def pseudo_least_squares(y, tx, compute_loss=mse):
     return w, loss
 
 
-def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rmse):
+def mean_spec(data):
+    for column in data.T:
+        temp = 0
+        agg = 0
+        for elem in column:
+            if elem != -999.0:
+                temp += elem
+                agg += 1
+        column[column == -999.0] = temp / agg
+
+
+def standardize(x):
+    return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
+
+
+def train_predict_logistic(y_train, x_train, x_test):
+    cat_col = 22
+    PRI_jet_nums = np.unique(x_train[:, cat_col])
+    predictions = np.zeros(x_test.shape[0])
+
+    for num in PRI_jet_nums:
+        cat_indices_tr = np.where(x_train[:, cat_col] == num)
+
+        x_train_cat = x_train[cat_indices_tr]
+        x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
+
+        stds = np.std(x_train_cat, axis=0)
+        deleted_cols_ids = np.where(stds == 0)
+        x_train_cat = np.delete(x_train_cat, deleted_cols_ids, axis=1)
+        mean_spec(x_train_cat)
+        x_train_cat = standardize(x_train_cat)
+
+        loss, w, _ = logistic_regression(y_train[cat_indices_tr],
+                                         x_train_cat,
+                                         max_iter=100,
+                                         threshold=10**(-4))
+
+        cat_indices_te = np.where(x_test[:, cat_col] == num)
+        x_test_cat = x_test[cat_indices_te]
+        x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
+        x_test_cat = np.delete(x_test_cat, deleted_cols_ids, axis=1)
+        x_test_cat = standardize(x_test_cat)
+
+        x_test_cat = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
+
+        predictions_cat = logistic_predict_labels(w, x_test_cat)
+        predictions[cat_indices_te] = predictions_cat
+    return predictions
+
+
+def logistic_cross_validation(y, x, k_fold, seed=1):
     """
     Computes weights, training and testing error
 
@@ -122,16 +172,14 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
         test_x, test_y = x[k_indices[k]], y[k_indices[k]]
         train_indices = k_indices[[i for i in range(len(k_indices)) if i != k]]
         train_indices = np.ravel(train_indices)
-        tx = polynomial_enhancement(x[train_indices], degree)
-        w, loss_tr = regression_f(y[train_indices], tx)
+        train_x, train_y = x[train_indices], y[train_indices]
 
-        empirical_y_test = helper.predict_labels(w, polynomial_enhancement(test_x, degree))
-        sum_vector = (empirical_y_test + test_y)
+        predictions = train_predict_logistic(train_y, train_x, test_x)
+
+        sum_vector = (predictions + test_y)
         accuracy = sum_vector[np.where(sum_vector != 0)].size / test_y.size
 
-        loss_te = compute_loss(
-            test_y, polynomial_enhancement(test_x, degree), w)
-        return loss_tr, loss_te, w, accuracy
+        return accuracy
 
     loss_tr = []
     loss_te = []
@@ -139,13 +187,10 @@ def cross_validation(y, x, k_fold, regression_f, degree, seed=1, compute_loss=rm
     accuracy = []
 
     for i in range(k_fold):
-        tmp_loss_tr, tmp_loss_te, w, tmp_accuracy = cross_validation_step(i)
-        loss_tr.append(tmp_loss_tr)
-        loss_te.append(tmp_loss_te)
+        tmp_accuracy = cross_validation_step(i)
         accuracy.append(tmp_accuracy)
-        weigths.append(w)
 
-    return accuracy, loss_tr, loss_te, weigths
+    return accuracy
 
 
 def sigmoid(t):
