@@ -111,6 +111,37 @@ def standardize(x):
 
 
 def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
+    """
+    Creates the prediction vector for the provided data after
+    normalizing using logistic regression.
+    """
+    stds = np.std(x_train, axis=0)
+    deleted_cols_ids = np.where(stds == 0)
+    x_train = np.delete(x_train, deleted_cols_ids, axis=1)
+    mean_spec(x_train)
+    x_train = standardize(x_train)
+
+    loss, w, _ = logistic_regression(y_train,
+                                     x_train,
+                                     max_iter=max_iter,
+                                     threshold=threshold)
+
+    x_test = np.delete(x_test, deleted_cols_ids, axis=1)
+    mean_spec(x_test)
+    x_test_cat = standardize(x_test)
+
+    x_test = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
+
+    predictions = logistic_predict_labels(w, x_test)
+    return predictions
+
+
+def train_predict_logistic_cat(y_train, x_train, x_test, max_iter=100, threshold=1):
+    """
+    Creates the prediction vector for the provided data after normalizing using
+    logistic regression. The data is split and in different categories according
+    to column PRI_jet_nums and the model is trained independently on each category
+    """
     cat_col = 22
     PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
@@ -121,32 +152,21 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
         x_train_cat = x_train[cat_indices_tr]
         x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
 
-        stds = np.std(x_train_cat, axis=0)
-        deleted_cols_ids = np.where(stds == 0)
-        x_train_cat = np.delete(x_train_cat, deleted_cols_ids, axis=1)
-        mean_spec(x_train_cat)
-        x_train_cat = standardize(x_train_cat)
-
-        loss, w, _ = logistic_regression(y_train[cat_indices_tr],
-                                         x_train_cat,
-                                         max_iter=max_iter,
-                                         threshold=threshold)
-
         cat_indices_te = np.where(x_test[:, cat_col] == num)
         x_test_cat = x_test[cat_indices_te]
         x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
-        x_test_cat = np.delete(x_test_cat, deleted_cols_ids, axis=1)
-        mean_spec(x_test_cat)
-        x_test_cat = standardize(x_test_cat)
 
-        x_test_cat = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
+        predictions_cat = train_predict_logistic(y_train[cat_indices_tr],
+                x_train_cat,
+                x_test_cat,
+                max_iter=max_iter,
+                threshold=threshold)
 
-        predictions_cat = logistic_predict_labels(w, x_test_cat)
         predictions[cat_indices_te] = predictions_cat
     return predictions
 
 
-def logistic_cross_validation(y, x, k_fold, seed=1):
+def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train_predict_logistic_cat):
     """
     Computes weights, training and testing error
 
@@ -177,10 +197,13 @@ def logistic_cross_validation(y, x, k_fold, seed=1):
 
         predictions = train_predict_logistic(train_y, train_x, test_x)
 
-        sum_vector = (predictions + test_y)
-        accuracy = sum_vector[np.where(sum_vector != 0)].size / test_y.size
+        predictions[predictions < 0] = 0
+        su = 0
+        for i in range(len(predictions)):
+            su += abs(predictions[i] - test_y[i])
 
-        return accuracy
+        return (len(predictions) - su) / len(predictions)
+        #return sum([abs(predictions - test_y)]) / len(predictions)
 
     #loss_tr = []
     #loss_te = []
@@ -252,6 +275,7 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
 
         w = w - armijo_step(grad, w, tx) * np.linalg.inv(hess) @ grad + regularizer
         return loss, w
+
 
     w = np.zeros((tx.shape[1], 1))
     prev_loss = 0
