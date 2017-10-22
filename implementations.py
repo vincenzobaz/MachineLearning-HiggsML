@@ -110,7 +110,7 @@ def standardize(x):
     return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
-def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
+def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1, deg=1):
     """
     Creates the prediction vector for the provided data after
     normalizing using logistic regression.
@@ -120,6 +120,7 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
     x_train = np.delete(x_train, deleted_cols_ids, axis=1)
     mean_spec(x_train)
     x_train = standardize(x_train)
+    x_train = polynomial_enhancement(x_train, deg)
 
     loss, w, _ = logistic_regression(y_train,
                                      x_train,
@@ -129,6 +130,7 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
     x_test = np.delete(x_test, deleted_cols_ids, axis=1)
     mean_spec(x_test)
     x_test_cat = standardize(x_test)
+    x_test_cat = polynomial_enhancement(x_test_cat, deg)
 
     x_test = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
 
@@ -136,7 +138,7 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1):
     return predictions
 
 
-def train_predict_logistic_cat(y_train, x_train, x_test, max_iter=100, threshold=1):
+def train_predict_logistic_cat(y_train, x_train, x_test, max_iter=100, threshold=1, deg=1):
     """
     Creates the prediction vector for the provided data after normalizing using
     logistic regression. The data is split and in different categories according
@@ -160,13 +162,13 @@ def train_predict_logistic_cat(y_train, x_train, x_test, max_iter=100, threshold
                 x_train_cat,
                 x_test_cat,
                 max_iter=max_iter,
-                threshold=threshold)
-
-        predictions[cat_indices_te] = predictions_cat
+                threshold=threshold, deg=deg)
+        
+        predictions[cat_indices_te] = predictions_cat.reshape(predictions[cat_indices_te].shape)
     return predictions
 
 
-def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train_predict_logistic_cat):
+def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train_predict_logistic_cat, deg=1):
     """
     Computes weights, training and testing error
 
@@ -195,7 +197,7 @@ def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train
         train_indices = np.ravel(train_indices)
         train_x, train_y = x[train_indices], y[train_indices]
 
-        predictions = train_predict_logistic(train_y, train_x, test_x)
+        predictions = train_predict_logistic_cat(train_y, train_x, test_x, deg=deg)
 
         predictions[predictions < 0] = 0
         su = 0
@@ -273,7 +275,7 @@ def logistic_regression(y, tx_data, max_iter, threshold, lambda_=None):
         # TODO: Not sure that regularizer is compatible with amijo
         regularizer = (lambda_ * np.linalg.norm(w)) if lambda_ is not None else 0
 
-        w = w - armijo_step(grad, w, tx) * np.linalg.inv(hess) @ grad + regularizer
+        w = w - armijo_step(grad, w, tx) * np.linalg.pinv(hess) @ grad + regularizer
         return loss, w
 
 
