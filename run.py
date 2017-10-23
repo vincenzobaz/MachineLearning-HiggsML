@@ -45,14 +45,11 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1, 
     x_train = polynomial_enhancement(x_train, deg)
     x_train = np.hstack((np.ones((x_train.shape[0], 1)), x_train))
 
-    newton_minimzer = lambda y, tx, w: minimizers.newton_step(y, tx, w,
-            logistic.compute_gradient, logistic.compute_hessian)
-
-    loss, w, _ = logistic.logistic_regression(y_train,
-                                              x_train,
-                                              max_iter,
-                                              threshold,
-                                              newton_minimzer)
+    loss, w = logistic.logistic_regression(y_train,
+                                           x_train,
+                                           max_iter,
+                                           threshold,
+                                           minimizers.newton)
 
     x_test = np.delete(x_test, deleted_cols_ids, axis=1)
     mean_spec(x_test)

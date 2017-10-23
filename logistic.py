@@ -37,23 +37,14 @@ def compute_hessian(tx, w):
     return np.multiply(tx.T, S.T) @ tx
 
 
-def logistic_regression(y, tx, max_iter, threshold, minimzer_step, lambda_=None):
+def logistic_regression(y, tx, max_iter, threshold, minimize, lambda_=None):
     y = np.reshape(y, (len(y), 1))
 
     w = np.zeros((tx.shape[1], 1))
-    prev_loss = 0
-    next_loss = np.inf
-    losses = []
 
-    for i in range(max_iter):
-        prev_loss = next_loss
-        next_loss = compute_loss(y, tx, w)
-        w = minimzer_step(y, tx, w)
-        if np.abs(prev_loss - next_loss) < threshold:
-            break
-        losses.append(next_loss)
+    loss, w = minimize(y, tx, w, max_iter, threshold,
+            compute_gradient, compute_loss, compute_hessian)
 
-        #print("Current iteration={i}, the loss={l}".format(i=i, l=next_loss))
-    print('Completed logistic regression with loss', next_loss)
-    return next_loss, w, losses
+    print('Completed logistic regression with loss', loss)
+    return loss, w
 
