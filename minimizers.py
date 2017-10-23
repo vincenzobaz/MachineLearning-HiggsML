@@ -44,13 +44,13 @@ def gradient_descent_step(y, tx, w, compute_gradient, gamma):
     return w - gamma * compute_gradient(y, tx, w)
 
 
-def newton(y, tx, w, max_iter, threshold, compute_gradient, cost_f, compute_hessian):
+def newton(y, tx, w, max_iter, threshold, compute_gradient, cost_f, compute_hessian, lambda_=None):
     step_f = lambda y, tx, w: newton_step(y, tx, w, compute_gradient, compute_hessian)
 
     return minimize(y, tx, w, max_iter, threshold, step_f, cost_f)
 
 
-def gradient_descent(y, tx, w, max_iter, threshold, compute_gradient, cost_f, *args, gamma=0.001):
+def gradient_descent(y, tx, w, max_iter, threshold, compute_gradient, cost_f, *args, gamma=1, lambda_=None):
     step_f = lambda y, tx, w: gradient_descent_step(y, tx, w, compute_gradient, gamma)
 
     return minimize(y, tx, w, max_iter, threshold, step_f, cost_f)
