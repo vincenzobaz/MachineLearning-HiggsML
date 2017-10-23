@@ -43,7 +43,7 @@ def logistic_regression(y, tx, max_iter, threshold, minimize, lambda_=None):
     w = np.zeros((tx.shape[1], 1))
 
     loss, w = minimize(y, tx, w, max_iter, threshold,
-            compute_gradient, compute_loss, compute_hessian)
+            compute_gradient, compute_loss, compute_hessian, lambda_)
 
     print('Completed logistic regression with loss', loss)
     return loss, w
