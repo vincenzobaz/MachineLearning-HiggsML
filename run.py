@@ -121,7 +121,7 @@ def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_logistic=train
         train_indices = np.ravel(train_indices)
         train_x, train_y = x[train_indices], y[train_indices]
 
-        predictions = train_predict_logistic_cat(train_y, train_x, test_x, deg=deg)
+        predictions = train_predict_logistic(train_y, train_x, test_x, deg=deg)
 
         predictions[predictions < 0] = 0
         su = 0
