@@ -39,6 +39,12 @@ class LeastSquares:
         ready = self.preprocessor.preprocess_test(x_test)
         return x_test @ self.model
 
+    def predict_labels(self, x_test):
+        raw_labels = self.predict(x_test)
+        raw_labels[raw_labels > 0] = 1
+        raw_labels[raw_labels <= 0] = -1
+        return raw_labels
+
     def _direct_s(self, y, tx):
         self.model = np.linalg.inv(tx.T @ tx) @ tx.T @ y
         self.loss = self.solver_args.get('compute_loss', imp.rmse)(y, tx, self.model)
@@ -52,4 +58,3 @@ class LeastSquares:
     def compute_gradient(y, tx, w):
         e = y - (tx @ w)
         return -1 / len(y) * (tx.T @ e)
-
