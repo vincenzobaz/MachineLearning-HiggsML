@@ -1,6 +1,5 @@
 import numpy as np
 import implementations as imp
-import minimizers
 from preprocessor import EmptyPreprocessor
 
 class LeastSquares:
@@ -50,7 +49,6 @@ class LeastSquares:
         self.loss = self.solver_args.get('compute_loss', imp.rmse)(y, tx, self.model)
 
     def _pseudo_s(self, y, tx):
-        U, S, V = np.linalg.svd(tx, full_matrices=False)
         self.model = np.linalg.pinv(tx) @ y
         self.loss = self.solver_args.get('compute_loss', imp.rmse)(y, tx, self.model)
 
