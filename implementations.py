@@ -3,7 +3,7 @@ import scripts.proj1_helpers as helper
 
 
 def mse(y, tx, w):
-    e = y - (tx @ np.ravel(w))
+    e = y - (tx @ w)
     return (e.T @ e) / (2 * len(y))
 
 
