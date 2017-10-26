@@ -11,7 +11,7 @@ class Model_Ensembler:
         x_tr = x_train.copy()
 
         # Split data into two parts
-        half_index = x_tr.shape[0] / 2
+        half_index = int(x_tr.shape[0] / 2)
         x_train_half_1 = x_tr[:half_index]
         x_train_half_2 = x_tr[half_index:]
 
@@ -20,7 +20,7 @@ class Model_Ensembler:
             model.train(y_train[half_index:], x_train_half_1)
 
         # Predict values on second half of the train data
-        stage_0_predictions = np.array([model.predict(x_train_half_2) for model in self.models]).T
+        stage_0_predictions = np.array([model.predict(x_train_half_2) for model in self.models]).T[0]
 
         # Feed those predictions to the meta model
         self.meta_model.train(y_train[:half_index], stage_0_predictions)
@@ -36,11 +36,11 @@ class Model_Ensembler:
 
         return meta_predictions
 
-    def predict_label(self, x_test):
+    def predict_labels(self, x_test):
         if not self.can_predict:
             raise Exception('Trying to predict before training')
 
-        stage_0_predictions = np.array([model.predict(x_test) for model in self.models]).T
-        meta_predictions = self.meta_model.predict_label(stage_0_predictions)
+        stage_0_predictions = np.array([model.predict(x_test) for model in self.models]).T[0]
+        meta_predictions = self.meta_model.predict_labels(stage_0_predictions)
 
         return meta_predictions
