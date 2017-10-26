@@ -1,3 +1,9 @@
+class EmptyPreprocessor:
+    def preprocess_train(self, x_train):
+        return x_train
+
+    def preprocess_test(self, x_test):
+        return x_test
 
 class Preprocessor:
 
