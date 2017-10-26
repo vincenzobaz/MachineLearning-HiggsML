@@ -3,8 +3,9 @@ import scripts.proj1_helpers as helper
 
 
 def mse(y, tx, w):
+    y = np.reshape(y, (len(y), 1))
     e = y - (tx @ w)
-    return (e @ e.T) / (2 * len(y))
+    return (e.T @ e)[0,0] / (2 * len(y))
 
 
 def rmse(y, tx, w):
