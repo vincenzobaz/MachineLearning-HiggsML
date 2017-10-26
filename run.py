@@ -3,6 +3,7 @@ import scripts.proj1_helpers as helper
 import logistic
 import minimizers
 import implementations as imp
+from logistic import LogisticRegression
 
 def polynomial_enhancement(x, deg):
     stacked_x = np.tile(x, deg)
@@ -45,11 +46,8 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1, 
     x_train = polynomial_enhancement(x_train, deg)
     x_train = np.hstack((np.ones((x_train.shape[0], 1)), x_train))
 
-    loss, w = logistic.logistic_regression(y_train,
-                                           x_train,
-                                           max_iter,
-                                           threshold,
-                                           minimizers.newton)
+    ls = LogisticRegression(max_iters=max_iter, threshold=threshold)
+    ls.train(y_train, x_train)
 
     x_test = np.delete(x_test, deleted_cols_ids, axis=1)
     mean_spec(x_test)
@@ -58,7 +56,7 @@ def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1, 
 
     x_test = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
 
-    predictions = logistic.predict_labels(w, x_test)
+    predictions = ls.predict_labels(x_test)
     return predictions
 
 
