@@ -23,8 +23,12 @@ TODO: at the end
 
 \section{Model and Methods}
 \label{sec:model}
-
 TODO: explain step chosen (what works, failed, why, using tables)
+\subsection{Preprocessing}
+After diving into the dataset the first question that came to our attention was what to do with the undefined values \textit{-999.0}. Two options came to mind, setting them to 0 or to the average of every valid values in each feature. We opted for the second option as it seemed more coherent. This is done by the \textit{mean\_spec} function in the \textit{run.py} file.
+
+\subsection{Models}
+
 
 \section{Results}
 
