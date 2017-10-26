@@ -48,6 +48,7 @@ class LogisticRegression:
 
     @staticmethod
     def compute_gradient(y, tx, w):
+        y = np.reshape(y, (len(y), 1))
         return tx.T @ (LogisticRegression.sigmoid(tx @ w) - y)
 
     @staticmethod
