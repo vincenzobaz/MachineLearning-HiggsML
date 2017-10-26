@@ -20,7 +20,7 @@ class Model_Ensembler:
             model.train(y_train[half_index:], x_train_half_1)
 
         # Predict values on second half of the train data
-        stage_0_predictions = np.array([model.predict(x_train_half_2) for model in self.models]).T[0]
+        stage_0_predictions = np.hstack([model.predict(x_train_half_2) for model in self.models])
 
         # Feed those predictions to the meta model
         self.meta_model.train(y_train[:half_index], stage_0_predictions)
