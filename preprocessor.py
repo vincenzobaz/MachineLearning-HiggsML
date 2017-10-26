@@ -29,4 +29,4 @@ class Preprocessor:
     def preprocess_test(self, x_test):
         if not self.can_preprocess_test:
             raise Exception('Trying to preprocess x_test before x_train')
-        return self.preprocess_test(x_test, self.test_process_dependency)
+        return self.preprocess_test_f(x_test, self.test_process_dependency)
