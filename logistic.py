@@ -71,6 +71,7 @@ class LogisticRegression:
                                              LogisticRegression.compute_loss,
                                              gamma, lambda_)
 
+        self.niter = niter
         self.model = w
         self.losses = losses
 
@@ -86,6 +87,7 @@ class LogisticRegression:
                                                        LogisticRegression.compute_loss,
                                                        gamma, lambda_)
 
+        self.niter = niter
         self.model = w
         self.losses = losses
 
