@@ -37,7 +37,7 @@ class LeastSquares:
 
     def predict(self, x_test):
         ready = self.preprocessor.preprocess_test(x_test)
-        return x_test @ self.model
+        return ready @ self.model
 
     def predict_labels(self, x_test):
         raw_labels = self.predict(x_test)

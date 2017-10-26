@@ -21,7 +21,7 @@ class LogisticRegression:
 
     def predict(self, x_test):
         ready = self.preprocessor.preprocess_test(x_test)
-        return LogisticRegression.sigmoid(x_test @ self.model)
+        return LogisticRegression.sigmoid(ready @ self.model)
 
     def predict_labels(self, x_test):
         """
@@ -91,4 +91,3 @@ class LogisticRegression:
 
     def _sgd(self, y, tx):
         pass
-

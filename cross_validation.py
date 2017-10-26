@@ -1,7 +1,7 @@
 import numpy as np
 import implementations as imp
 
-def cross_validation(y, x, k_fold, model, degree, seed=1, compute_loss=imp.rmse):
+def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
     """
     Computes weights, training and testing error
     regression_f is a regressiong function only accepting y and the tx matrix.
