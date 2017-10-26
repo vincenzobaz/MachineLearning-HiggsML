@@ -51,7 +51,7 @@ class LeastSquares:
 
     def _pseudo_s(self, y, tx):
         U, S, V = np.linalg.svd(tx, full_matrices=False)
-        self.model = V.T @ np.diag(1 / S) @ U.T @ y
+        self.model = np.linalg.pinv(tx) @ y
         self.loss = self.solver_args.get('compute_loss', imp.rmse)(y, tx, self.model)
 
     @staticmethod
