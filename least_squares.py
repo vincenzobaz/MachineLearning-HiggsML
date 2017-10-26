@@ -58,7 +58,7 @@ class LeastSquares:
         threshold = self.solver_args.get('threshold', 10**(-3))
         self.losses = []
 
-        while niter < max_iter and np.abs(next_loss - prev_loss) < threshold:
+        while niter < max_iter and np.abs(next_loss - prev_loss) > threshold:
             prev_loss = next_loss
             grad = self._compute_gradient(y, tx, w)
             w -= self.solver_args['gamma'] * grad
