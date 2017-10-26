@@ -8,12 +8,12 @@ from logistic import LogisticRegression
 def polynomial_enhancement(x, deg):
     stacked_x = np.tile(x, deg)
     power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
-    return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
+    #return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
+    return stacked_x ** power_vec
 
 
 def pseudo_least_squares(y, tx, compute_loss=imp.mse):
-    U, S, V = np.linalg.svd(tx, full_matrices=False)
-    w = V.T @ np.diag(1 / S) @ U.T @ y
+    w = np.linalg.pinv(tx) @ y
     loss = compute_loss(y, tx, w)
     return w, loss
 
@@ -26,7 +26,8 @@ def mean_spec(data):
             if elem != -999.0:
                 temp += elem
                 agg += 1
-        column[column == -999.0] = temp / agg
+        if agg != 0:
+            column[column == -999.0] = temp / agg
 
 
 def standardize(x):
