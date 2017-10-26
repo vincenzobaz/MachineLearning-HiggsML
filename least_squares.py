@@ -1,7 +1,7 @@
 import numpy as np
 import implementations as imp
 import minimizers
-from Preprocessor import EmptyPreprocessor()
+from Preprocessor import EmptyPreprocessor
 
 class LeastSquares:
     def __init__(self, preprocessor=EmptyPreprocessor(), solver='pseudo', **kwargs):

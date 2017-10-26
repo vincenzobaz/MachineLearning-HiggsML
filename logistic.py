@@ -1,6 +1,6 @@
 import numpy as np
 import minimizers
-from Preprocessor import EmptyPreprocessor()
+from Preprocessor import EmptyPreprocessor
 
 class LogisticRegression:
     def __init__(self, preprocessor=EmptyPreprocessor(), solver='newton', **kwargs):
@@ -19,7 +19,7 @@ class LogisticRegression:
         chooser[self.solver](y, processed)
 
     def get_probs(self, x_test):
-        ready = self.preprocess_test(x_test)
+        ready = self.preprocessor.preprocess_test(x_test)
         return LogisticRegression.sigmoid(x_test @ self.model)
 
     def predit_labels(self, x_test):
