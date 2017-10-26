@@ -5,7 +5,7 @@ def minimize(y, tx, init_arg, max_iter, threshold, step_f, cost_f):
     losses = []
     prev_loss, next_loss = 0, np.inf
     niter = 0
-    w = init_arg.copy()
+    w = init_arg
 
     while niter < max_iter and np.abs(prev_loss - next_loss) > threshold:
         prev_loss = next_loss

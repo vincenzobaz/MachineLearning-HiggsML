@@ -10,6 +10,7 @@ class LogisticRegression:
 
     def train(self, y, x):
         processed = self.preprocessor.preprocess_train(x)
+        y = np.reshape(y, (len(y), 1))
 
         chooser = {
             'newton': self._newton_s,
@@ -48,7 +49,6 @@ class LogisticRegression:
 
     @staticmethod
     def compute_gradient(y, tx, w):
-        y = np.reshape(y, (len(y), 1))
         return tx.T @ (LogisticRegression.sigmoid(tx @ w) - y)
 
     @staticmethod
@@ -77,7 +77,7 @@ class LogisticRegression:
     def _gradient(self, y, tx):
         w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
         max_iter = self.solver_args.get('max_iters', 100)
-        threshold = self.solver_args.get('threshold', 10**(-1))
+        threshold = self.solver_args.get('threshold', 0.1)
         gamma = self.solver_args.get('gamma')
         lambda_ = self.solver_args.get('lambda_')
 

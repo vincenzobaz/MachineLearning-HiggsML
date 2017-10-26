@@ -14,11 +14,10 @@ class LeastSquares:
         kwargs -- Additional arguments for the solver
 
         Exemple of usage:
-        ls = LeastSquares(prep, 'gradient', max_iters=100, threshold=0.001)
+        ls = LeastSquares(prep, 'direct')
         ls.train(tx)
         w = ls.model
         loss = ls.loss
-        losses = ls.losses # only if used iterative solver (gradient, stochastic)
         predictions = ls.predict(x_test)
         """
         self.preprocessor = preprocessor
@@ -27,13 +26,12 @@ class LeastSquares:
 
     def train(self, y, x):
         processed = self.preprocessor.preprocess_train(x)
+        y = np.reshape(y, (len(y), 1))
 
         # Switch statement à-la python
         chooser = {
             'pseudo': self._pseudo_s,
             'direct': self._direct_s,
-            'gradient': self._gradient_s,
-            'stochastic._gradient': self._sgd_s
         }
         chooser[self.solver](y, processed)
 
@@ -52,42 +50,6 @@ class LeastSquares:
 
     @staticmethod
     def compute_gradient(y, tx, w):
-        y = np.reshape(y, (len(y), 1))
         e = y - (tx @ w)
         return -1 / len(y) * (tx.T @ e)
-
-    def _gradient_s(self, y, tx):
-        niter = 0
-        w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
-        max_iter = self.solver_args.get('max_iters', 100)
-        threshold = self.solver_args.get('threshold', 10**(-3))
-        self.losses = []
-        gamma = self.solver_args['gamma']
-        lambda_ = self.solver_args.get('lambda_')
-
-        niter, losses, w = minimizers.gradient_descent(y, tx, w, max_iter, threshold,
-                                                       LeastSquares.compute_gradient,
-                                                       self.solver_args.get('compute_loss', imp.rmse),
-                                                       gamma, lambda_)
-
-        self.niter = niter
-        self.model = w
-        self.losses = losses
-
-    def _sgd_s(self, y, tx):
-        batch_size = self.solver_args['batch_size']
-        num_batches = self.solver_args['num_batches']
-        shuffle = self.solver_args['shuffle']
-        w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
-        loss = 0
-        self.losses = []
-
-        for batch_y, batch_tx in imp.batch_iter(y, tx, num_batches, shuffle):
-            grad = LeastSquares.compute_gradient(y, tx, w)
-            w -= self.solver_args['gamma'] * grad
-            loss = self.solver_args.get('compute_loss', imp.rmse)(y, tx, w)
-            self.losses.append(loss)
-
-        self.model = w
-        self.loss = loss
 
