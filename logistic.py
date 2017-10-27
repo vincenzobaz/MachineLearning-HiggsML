@@ -66,7 +66,7 @@ class LogisticRegression:
             'gradient': self._gradient,
             'stochastic': self._sgd
         }
-        chooser[self.solver](y, processed)
+        chooser[self.solver](processed_y, processed_x)
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
