@@ -1,5 +1,6 @@
 import numpy as np
 import minimizers
+import implementations
 from preprocessor import EmptyPreprocessor
 
 class LogisticRegression:
@@ -74,6 +75,7 @@ class LogisticRegression:
         self.niter = niter
         self.model = w
         self.losses = losses
+        self.loss = losses[-1]
 
     def _gradient(self, y, tx):
         w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
@@ -90,6 +92,24 @@ class LogisticRegression:
         self.niter = niter
         self.model = w
         self.losses = losses
+        self.loss = losses[-1]
 
     def _sgd(self, y, tx):
-        pass
+        w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
+        threshold = self.solver_args.get('threshold', 0.1)
+        gamma = self.solver_args.get('gamma')
+        lambda_ = self.solver_args.get('lambda_')
+        batch_size = self.solver_args['batch_size']
+        num_batches = self.solver_args['num_batches']
+        shuffle = self.solver_args.get('shuffle', True)
+        losses = []
+
+        for b_y, b_x in implementations.batch_iter(y, tx, batch_size, num_batches):
+            grad = LogisticRegression.compute_gradient(b_y, b_x, w)
+            loss = LogisticRegression.compute_loss(b_y, b_x, w)
+            w = w - gamma * grad
+            losses.append(loss)
+
+        self.model = w
+        self.losses = losses
+        self.loss = losses[-1]
