@@ -8,8 +8,8 @@ from logistic import LogisticRegression
 def polynomial_enhancement(x, deg):
     stacked_x = np.tile(x, deg)
     power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
-    #return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
-    return stacked_x ** power_vec
+    return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
+    #return stacked_x ** power_vec
 
 
 def pseudo_least_squares(y, tx, compute_loss=imp.mse):

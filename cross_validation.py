@@ -44,6 +44,7 @@ def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
     accuracy = []
 
     for i in range(k_fold):
+        print('Step', i + 1, '/', k_fold)
         tmp_accuracy = cross_validation_step(i)
         # loss_tr.append(tmp_loss_tr)
         # loss_te.append(tmp_loss_te)

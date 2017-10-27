@@ -1,10 +1,11 @@
 import numpy as np
 import minimizers
 import implementations
+import run as run
 from preprocessor import EmptyPreprocessor
 
 class LogisticRegression:
-    def __init__(self, preprocessor=EmptyPreprocessor(), solver='newton', **kwargs):
+    def __init__(self, degree=1, solver='newton', **kwargs):
         """Model constructor. This model implements LogisticRegression for
         classification
 
@@ -51,13 +52,13 @@ class LogisticRegression:
             - shuffle: boolean indicating whether the data should be shuffled
                        before division.
         """
-        self.preprocessor = preprocessor
         self.solver = solver
         self.solver_args = kwargs
+        self.degree = degree
 
     def train(self, y, x):
         """Trains the model on the provided x,y data"""
-        processed_x, processed_y = self.preprocessor.preprocess_train(x, y)
+        processed = run.polynomial_enhancement(x, self.degree)
         y = np.reshape(y, (len(y), 1))
 
         chooser = {
@@ -69,7 +70,7 @@ class LogisticRegression:
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
-        ready = self.preprocessor.preprocess_test(x_test)
+        ready = run.polynomial_enhancement(x_test, self.degree)
         return LogisticRegression.sigmoid(ready @ self.model)
 
     def predict_labels(self, x_test):
