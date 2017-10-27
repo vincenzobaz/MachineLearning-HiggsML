@@ -66,7 +66,8 @@ class LogisticRegression:
             'gradient': self._gradient,
             'stochastic': self._sgd
         }
-        chooser[self.solver](processed_y, processed_x)
+        chooser[self.solver](y, processed)
+        return self
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
@@ -77,7 +78,8 @@ class LogisticRegression:
         """Generates labels (-1, 1) for classification"""
         probs = self.predict(x_test)
         probs[probs >= 0.5] = 1
-        probs[probs < 0.5] = -1
+        #probs[probs < 0.5] = -1
+        probs[probs < 0.5] = 0
         return probs
 
     @staticmethod

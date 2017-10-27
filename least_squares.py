@@ -38,7 +38,8 @@ class LeastSquares:
             'pseudo': self._pseudo_s,
             'direct': self._direct_s,
         }
-        chooser[self.solver](processed_y, processed_x)
+        chooser[self.solver](y, processed_x)
+        return self
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
