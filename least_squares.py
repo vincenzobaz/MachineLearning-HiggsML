@@ -1,9 +1,10 @@
 import numpy as np
 import implementations as imp
 from preprocessor import EmptyPreprocessor
+import run as run
 
 class LeastSquares:
-    def __init__(self, preprocessor=EmptyPreprocessor(), solver='pseudo', **kwargs):
+    def __init__(self, degree=1, solver='pseudo', **kwargs):
         """Model constructor. A model provides an interface composed of
         train, predict, loss, model.
         This model implements the least squares computation.
@@ -23,13 +24,13 @@ class LeastSquares:
         loss = ls.loss
         predictions = ls.predict(x_test)
         """
-        self.preprocessor = preprocessor
         self.solver = solver
         self.solver_args = kwargs
+        self.degree = degree
 
     def train(self, y, x):
         """Trains the model on the provided x,y data"""
-        processed = self.preprocessor.preprocess_train(x)
+        processed = run.polynomial_enhancement(x, self.degree)
         y = np.reshape(y, (len(y), 1))
 
         # Switch statement à-la python
@@ -41,7 +42,7 @@ class LeastSquares:
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
-        ready = self.preprocessor.preprocess_test(x_test)
+        ready = run.polynomial_enhancement(x_test, self.degree)
         return ready @ self.model
 
     def predict_labels(self, x_test):
@@ -66,4 +67,3 @@ class LeastSquares:
         """Computes the gradient of f(w) = tx @ w"""
         e = y - (tx @ w)
         return -1 / len(y) * (tx.T @ e)
-
