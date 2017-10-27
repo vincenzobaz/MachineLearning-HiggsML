@@ -15,9 +15,6 @@ def gradient(y, tx, w):
     e = y - (tx @ w)
     return -1 / len(y) * (tx.T @ e)
 
-# TODO: Ask if we can add named optional parametrs
-# to avoid this and being able to switch functions
-
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma,
                      compute_loss=mse, compute_gradient=gradient):
@@ -31,6 +28,73 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma,
         loss = compute_loss(y, tx, w)
 
     return w, compute_loss(y, tx, w)
+
+
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma,
+                      compute_loss=mse, compute_gradient=gradient):
+    w = initial_w
+    loss = 0
+    for batch_y, batch_tx in batch_iter(y, tx, 1, num_batches=max_iters):
+        gradient = compute_gradient(batch_y, batch_tx, w)
+        w -= gamma * gradient
+        loss = compute_loss(batch_y, batch_tx, w)
+    return w, loss
+
+
+def least_squares(y, tx, compute_loss=mse):
+    w = np.linalg.inv(tx.T @ tx) @ tx.T @ y
+    return w, compute_loss(y, tx, w)
+
+
+def ridge_regression(y, tx, lambda_, compute_loss=rmse):
+    lambda_p = lambda_ * 2 * len(y)
+    w = np.linalg.inv(tx.T @ tx + lambda_p *
+                      np.identity(tx.shape[1])) @ tx.T @ y
+    return w, compute_loss(y, tx, w)
+
+
+def sigmoid(t):
+    """Logistic function"""
+    negative_ids = np.where(t < 0)
+    positive_ids = np.where(t >= 0)
+    t[negative_ids] = np.exp(t[negative_ids]) / (1 + np.exp(t[negative_ids]))
+    t[positive_ids] = np.power(np.exp(-t[positive_ids]) + 1, -1)
+    return t
+
+
+def compute_logistic_loss(y, tx, w):
+    """Computes loss using log-likelihood"""
+    txw = tx @ w
+    return np.sum(np.log(1 + np.exp(txw)) - y * txw)
+
+
+def compute_logistic_gradient(y, tx, w):
+    return tx.T @ (sigmoid(tx @ w) - y)
+
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    w = initial_w
+    loss = np.inf
+
+    for _ in range(max_iters):
+        grad = compute_logistic_gradient(y, tx, w)
+        loss = compute_logistic_loss(y, tx, w)
+        w = w - gamma * grad
+
+    return w, loss
+
+
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    w = initial_w
+    loss = np.inf
+
+    for _ in range(max_iters):
+        grad = compute_logistic_gradient(y, tx, w)
+        loss = compute_logistic_loss(y, tx, w)
+        regularizer = lambda_ * np.linalg.norm(w)
+        w - w - gamma * grad + regularizer
+
+    return w, loss
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
@@ -58,26 +122,4 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
-
-def least_squares_SGD(y, tx, initial_w, max_iters, gamma,
-                      compute_loss=mse, compute_gradient=gradient):
-    w = initial_w
-    loss = 0
-    for batch_y, batch_tx in batch_iter(y, tx, 1, num_batches=max_iters):
-        gradient = compute_gradient(batch_y, batch_tx, w)
-        w -= gamma * gradient
-        loss = compute_loss(batch_y, batch_tx, w)
-    return w, loss
-
-
-def least_squares(y, tx, compute_loss=mse):
-    w = np.linalg.inv(tx.T @ tx) @ tx.T @ y
-    return w, compute_loss(y, tx, w)
-
-
-def ridge_regression(y, tx, lambda_, compute_loss=rmse):
-    lambda_p = lambda_ * 2 * len(y)
-    w = np.linalg.inv(tx.T @ tx + lambda_p *
-                      np.identity(tx.shape[1])) @ tx.T @ y
-    return w, compute_loss(y, tx, w)
 
