@@ -17,13 +17,13 @@ class Model_Ensembler:
 
         # Train first stage models
         for model in self.models:
-            model.train(y_train[half_index:], x_train_half_1)
+            model.train(y_train[:half_index], x_train_half_1)
 
         # Predict values on second half of the train data
         stage_0_predictions = np.hstack([model.predict(x_train_half_2) for model in self.models])
 
         # Feed those predictions to the meta model
-        self.meta_model.train(y_train[:half_index], stage_0_predictions)
+        self.meta_model.train(y_train[half_index:], stage_0_predictions)
 
         self.can_predict = True
 
@@ -31,7 +31,7 @@ class Model_Ensembler:
         if not self.can_predict:
             raise Exception('Trying to predict before training')
 
-        stage_0_predictions = np.array([model.predict(x_test) for model in self.models]).T
+        stage_0_predictions = np.hstack([model.predict(x_test) for model in self.models])
         meta_predictions = self.meta_model.predict(stage_0_predictions)
 
         return meta_predictions
@@ -40,7 +40,7 @@ class Model_Ensembler:
         if not self.can_predict:
             raise Exception('Trying to predict before training')
 
-        stage_0_predictions = np.array([model.predict(x_test) for model in self.models]).T[0]
+        stage_0_predictions = np.hstack([model.predict(x_test) for model in self.models])
         meta_predictions = self.meta_model.predict_labels(stage_0_predictions)
 
         return meta_predictions
