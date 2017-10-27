@@ -57,7 +57,7 @@ class LogisticRegression:
 
     def train(self, y, x):
         """Trains the model on the provided x,y data"""
-        processed = self.preprocessor.preprocess_train(x)
+        processed_x, processed_y = self.preprocessor.preprocess_train(x, y)
         y = np.reshape(y, (len(y), 1))
 
         chooser = {
@@ -65,7 +65,7 @@ class LogisticRegression:
             'gradient': self._gradient,
             'stochastic': self._sgd
         }
-        chooser[self.solver](y, processed)
+        chooser[self.solver](processed_y, processed_x)
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
