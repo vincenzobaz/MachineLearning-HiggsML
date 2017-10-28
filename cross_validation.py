@@ -34,6 +34,7 @@ def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
 
         accuracy = np.array([label == test_y[i] for i, label in enumerate(predicted_raw_labels)])
         accuracy = np.sum(accuracy) / accuracy.size
+        print(accuracy)
 
         #loss_te = compute_loss(test_y, polynomial_enhancement(test_x, degree), w)
         return accuracy
