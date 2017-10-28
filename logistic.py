@@ -66,18 +66,18 @@ class LogisticRegression:
             'gradient': self._gradient,
             'stochastic': self._sgd
         }
-        chooser[self.solver](processed_y, processed_x)
+        chooser[self.solver](y, processed)
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
         ready = run.polynomial_enhancement(x_test, self.degree)
-        return LogisticRegression.sigmoid(ready @ self.model)
+        return ready @ self.model
 
     def predict_labels(self, x_test):
         """Generates labels (-1, 1) for classification"""
         probs = self.predict(x_test)
-        probs[probs >= 0.5] = 1
-        probs[probs < 0.5] = -1
+        probs[probs >= 0] = 1
+        probs[probs < 0] = 0
         return probs
 
     @staticmethod
@@ -88,14 +88,21 @@ class LogisticRegression:
         negative_ids = np.where(t < 0)
         positive_ids = np.where(t >= 0)
         t[negative_ids] = np.exp(t[negative_ids]) / (1 + np.exp(t[negative_ids]))
-        t[positive_ids] = np.power(np.exp(-t[positive_ids]) + 1, -1)
+        t[positive_ids] = 1 / (np.exp(-t[positive_ids]) + 1)
         return t
 
     @staticmethod
     def compute_loss(y, tx, w):
         """Computes loss using log-likelihood"""
         txw = tx @ w
+        #return np.sum(np.log(1 + np.exp(txw)) - y * txw)
+        #negative_ids = np.where(txw < 0)
+        #positive_ids = np.where(txw >= 0)
+
+        #txw[negative_ids] = -txw[negative_ids] + 1
+        #txw[positive_ids] = np.exp(-txw[positive_ids])
         return np.sum(np.log(1 + np.exp(txw)) - y * txw)
+        #return np.sum(txw)
 
     @staticmethod
     def compute_gradient(y, tx, w):
@@ -114,7 +121,7 @@ class LogisticRegression:
         """Minimizes the loss function using Newton's method"""
         # Retrieve parameters from kwargs or initialize defaults
         w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
-        max_iter = self.solver_args.get('max_iters', 100)
+        max_iter = self.solver_args.get('max_iters', 200)
         threshold = self.solver_args.get('threshold', 10**(-1))
         gamma = self.solver_args.get('gamma')
         lambda_ = self.solver_args.get('lambda_')
