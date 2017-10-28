@@ -33,7 +33,7 @@ def preprocess(x_tr, x_te=None):
     deleted_cols_ids = np.where(stds < 0.7)
 
     x_train = np.delete(x_train, deleted_cols_ids, axis=1)
-    mean_spec(x_train)
+    x_train = mean_spec(x_train)
     x_train = standardize(x_train)
 
 
