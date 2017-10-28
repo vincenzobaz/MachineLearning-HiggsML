@@ -8,7 +8,6 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: literature.bib
-Warning--I didn't find a database entry for "kallet04methods"
 -- IEEEtran.bst version 1.13 (2008/09/30) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
@@ -16,7 +15,7 @@ Warning--I didn't find a database entry for "kallet04methods"
 Done.
 You've used 1 entry,
             4039 wiz_defined-function locations,
-            817 strings with 7546 characters,
+            816 strings with 7531 characters,
 and the built_in function-call counts, 450 in all, are:
 = -- 32
 > -- 9
@@ -55,4 +54,3 @@ warning$ -- 0
 while$ -- 1
 width$ -- 2
 write$ -- 30
-(There was 1 warning)
