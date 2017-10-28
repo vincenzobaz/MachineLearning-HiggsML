@@ -1,40 +1,8 @@
 import numpy as np
 import scripts.proj1_helpers as helper
-import logistic
-import minimizers
-import implementations as imp
+
 from logistic import LogisticRegression
 from preprocessing import preprocess
-
-
-def polynomial_enhancement(x, deg):
-    stacked_x = np.tile(x, deg)
-    power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
-    return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
-
-
-def most_frequent(arr):
-    _, counts = np.unique(arr, return_counts=True)
-    return np.argmax(counts)
-
-
-def mean_spec(data):
-    for column in data.T:
-        column[column == -999.0] = most_frequent(column)
-        """
-        temp = 0
-        agg = 0
-        for elem in column:
-            if elem != -999.0:
-                temp += elem
-                agg += 1
-        if agg != 0:
-            column[column == -999.0] = temp / agg
-        """
-
-
-def standardize(x):
-    return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
 def category_iter(y_train, x_train, cat_col, x_test=None):
@@ -125,4 +93,5 @@ def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_cat
         print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
+
 

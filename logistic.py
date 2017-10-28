@@ -1,8 +1,7 @@
 import numpy as np
 import minimizers
 import implementations
-import run as run
-from preprocessor import EmptyPreprocessor
+from preprocessing import polynomial_enhancement
 
 class LogisticRegression:
     def __init__(self, degree=1, solver='newton', **kwargs):
@@ -58,7 +57,7 @@ class LogisticRegression:
 
     def train(self, y, x):
         """Trains the model on the provided x,y data"""
-        processed = run.polynomial_enhancement(x, self.degree)
+        processed = polynomial_enhancement(x, self.degree)
         y = np.reshape(y, (len(y), 1))
 
         chooser = {
@@ -71,7 +70,7 @@ class LogisticRegression:
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
-        ready = run.polynomial_enhancement(x_test, self.degree)
+        ready = polynomial_enhancement(x_test, self.degree)
         return LogisticRegression.sigmoid(ready @ self.model)
 
     def predict_labels(self, x_test):
