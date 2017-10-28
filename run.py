@@ -23,7 +23,7 @@ def category_iter(y_train, x_train, cat_col, x_test=None):
             yield y_train_cat, x_train_cat
 
 
-def train_predict_categories(y_train, x_train, x_test, model):
+def train_predict_categories(y_train, x_train, x_test, *models):
     """
     Creates the prediction vector for the provided data after normalizing using
     logistic regression. The data is split and trained in different categories
@@ -37,10 +37,11 @@ def train_predict_categories(y_train, x_train, x_test, model):
     PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
-    for cat_data in category_iter(y_train, x_train, cat_col, x_test):
+    for idx, cat_data in enumerate(category_iter(y_train, x_train, cat_col, x_test)):
         y_train_cat, x_train_cat, x_test_cat, cat_indices_te = cat_data
         x_train_cat, x_test_cat = preprocess(x_train_cat, x_test_cat)
 
+        model = models[0][0] if len(models) < 4 else models[idx][0]
         predictions_cat = model.train(y_train_cat, x_train_cat)\
                                .predict_labels(x_test_cat)
 
@@ -48,7 +49,7 @@ def train_predict_categories(y_train, x_train, x_test, model):
     return predictions
 
 
-def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_categories, seed=1):
+def best_cross_validation(y, x, k_fold, *models, train_predict_f=train_predict_categories, seed=1):
     """
     Computes weights, training and testing error
 
@@ -77,7 +78,7 @@ def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_cat
         train_indices = np.ravel(train_indices)
         train_x, train_y = x[train_indices], y[train_indices]
 
-        predictions = train_predict_f(train_y, train_x, test_x, model)
+        predictions = train_predict_f(train_y, train_x, test_x, models)
 
         su = 0
         for i in range(len(predictions)):
@@ -93,5 +94,4 @@ def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_cat
         print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
-
 
