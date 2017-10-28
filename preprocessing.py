@@ -13,18 +13,12 @@ def most_frequent(arr):
 
 
 def mean_spec(data):
-    for column in data.T:
-        column[column == -999.0] = most_frequent(column)
-        """
-        temp = 0
-        agg = 0
-        for elem in column:
-            if elem != -999.0:
-                temp += elem
-                agg += 1
-        if agg != 0:
-            column[column == -999.0] = temp / agg
-        """
+    arr = data.copy()
+    not_nines = arr != -999.0
+    for indicator, column in zip(not_nines.T, arr.T):
+        mean = np.mean(column[indicator])
+        column[np.logical_not(indicator)] = mean
+    return arr
 
 
 def standardize(x):
