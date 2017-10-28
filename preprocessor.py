@@ -1,6 +1,6 @@
 class EmptyPreprocessor:
-    def preprocess_train(self, x_train):
-        return x_train
+    def preprocess_train(self, x_train, y=None):
+        return x_train, y
 
     def preprocess_test(self, x_test):
         return x_test
@@ -20,7 +20,7 @@ class Preprocessor:
         self.preprocess_test_f = preprocess_test
         self.can_preprocess_test = False
 
-    def preprocess_train(self, x_train):
+    def preprocess_train(self, x_train, y_train=None):
         processed_x_train, dependency = self.preprocess_train_f(x_train)
         self.test_process_dependency = dependency
         self.can_preprocess_test = True

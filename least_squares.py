@@ -39,6 +39,7 @@ class LeastSquares:
             'direct': self._direct_s,
         }
         chooser[self.solver](y, processed)
+        return self
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""

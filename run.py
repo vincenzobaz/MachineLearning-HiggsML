@@ -4,22 +4,24 @@ import logistic
 import minimizers
 import implementations as imp
 from logistic import LogisticRegression
+from preprocessing import preprocess
+
 
 def polynomial_enhancement(x, deg):
     stacked_x = np.tile(x, deg)
     power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
     return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
-    #return stacked_x ** power_vec
 
 
-def pseudo_least_squares(y, tx, compute_loss=imp.mse):
-    w = np.linalg.pinv(tx) @ y
-    loss = compute_loss(y, tx, w)
-    return w, loss
+def most_frequent(arr):
+    _, counts = np.unique(arr, return_counts=True)
+    return np.argmax(counts)
 
 
 def mean_spec(data):
     for column in data.T:
+        column[column == -999.0] = most_frequent(column)
+        """
         temp = 0
         agg = 0
         for elem in column:
@@ -28,70 +30,57 @@ def mean_spec(data):
                 agg += 1
         if agg != 0:
             column[column == -999.0] = temp / agg
+        """
 
 
 def standardize(x):
     return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
-def train_predict_logistic(y_train, x_train, x_test, max_iter=100, threshold=1, deg=1):
-    """
-    Creates the prediction vector for the provided data after
-    normalizing using logistic regression.
-    """
-    stds = np.std(x_train, axis=0)
-    deleted_cols_ids = np.where(stds == 0)
-    x_train = np.delete(x_train, deleted_cols_ids, axis=1)
-    mean_spec(x_train)
-    x_train = standardize(x_train)
-    x_train = polynomial_enhancement(x_train, deg)
-    x_train = np.hstack((np.ones((x_train.shape[0], 1)), x_train))
+def category_iter(y_train, x_train, cat_col, x_test=None):
+    values = np.unique(x_train[:, cat_col])
 
-    ls = LogisticRegression(max_iters=max_iter, threshold=threshold)
-    ls.train(y_train, x_train)
+    for val in values:
+        cat_indices_tr = np.where(x_train[:, cat_col] == val)
+        x_train_cat = x_train[cat_indices_tr]
+        x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
+        y_train_cat = y_train[cat_indices_tr]
 
-    x_test = np.delete(x_test, deleted_cols_ids, axis=1)
-    mean_spec(x_test)
-    x_test_cat = standardize(x_test)
-    x_test_cat = polynomial_enhancement(x_test_cat, deg)
-
-    x_test = np.hstack((np.ones((x_test_cat.shape[0], 1)), x_test_cat))
-
-    predictions = ls.predict_labels(x_test)
-    return predictions
+        if x_test is not None:
+            cat_indices_te = np.where(x_test[:, cat_col] == val)
+            x_test_cat = x_test[cat_indices_te]
+            x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
+            yield y_train_cat, x_train_cat, x_test_cat, cat_indices_te
+        else:
+            yield y_train_cat, x_train_cat
 
 
-def train_predict_logistic_cat(y_train, x_train, x_test, max_iter=100, threshold=1, deg=1):
+def train_predict_categories(y_train, x_train, x_test, model):
     """
     Creates the prediction vector for the provided data after normalizing using
-    logistic regression. The data is split and in different categories according
-    to column PRI_jet_nums and the model is trained independently on each category
+    logistic regression. The data is split and trained in different categories
+    according to column PRI_jet_nums and the model is trained independently on each category
     """
     cat_col = 22
+    for idx, col in enumerate(x_train.T):
+        if len(col) == 4 and np.allclose(np.arange(0, 4), col):
+            cat_col = idx
+
     PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
-    for num in PRI_jet_nums:
+    for cat_data in category_iter(y_train, x_train, cat_col, x_test):
+        y_train_cat, x_train_cat, x_test_cat, cat_indices_te = cat_data
+        x_train_cat, x_test_cat = preprocess(x_train_cat, x_test_cat)
 
-        cat_indices_tr = np.where(x_train[:, cat_col] == num)
-        x_train_cat = x_train[cat_indices_tr]
-        x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
-
-        cat_indices_te = np.where(x_test[:, cat_col] == num)
-        x_test_cat = x_test[cat_indices_te]
-        x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
-
-        predictions_cat = train_predict_logistic(y_train[cat_indices_tr],
-                x_train_cat,
-                x_test_cat,
-                max_iter=max_iter,
-                threshold=threshold, deg=deg)
+        predictions_cat = model.train(y_train_cat, x_train_cat)\
+                               .predict_labels(x_test_cat)
 
         predictions[cat_indices_te] = predictions_cat.reshape(predictions[cat_indices_te].shape)
     return predictions
 
 
-def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_f=train_predict_logistic_cat, deg=1):
+def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_categories, seed=1):
     """
     Computes weights, training and testing error
 
@@ -120,19 +109,14 @@ def logistic_cross_validation(y, x, k_fold, seed=1, train_predict_f=train_predic
         train_indices = np.ravel(train_indices)
         train_x, train_y = x[train_indices], y[train_indices]
 
-        predictions = train_predict_f(train_y, train_x, test_x, deg=deg)
+        predictions = train_predict_f(train_y, train_x, test_x, model)
 
-        predictions[predictions < 0] = 0
         su = 0
         for i in range(len(predictions)):
             su += abs(predictions[i] - test_y[i])
 
         return (len(predictions) - su) / len(predictions)
-        #return sum([abs(predictions - test_y)]) / len(predictions)
 
-    #loss_tr = []
-    #loss_te = []
-    #weigths = []  # if quadratic, three parameters....
     accuracy = []
 
     for i in range(k_fold):
