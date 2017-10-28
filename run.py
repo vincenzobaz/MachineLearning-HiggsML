@@ -37,6 +37,24 @@ def standardize(x):
     return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
+def category_iter(y_train, x_train, cat_col, x_test=None):
+    values = np.unique(x_train[:, cat_col])
+
+    for val in values:
+        cat_indices_tr = np.where(x_train[:, cat_col] == val)
+        x_train_cat = x_train[cat_indices_tr]
+        x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
+        y_train_cat = y_train[cat_indices_tr]
+
+        if x_test is not None:
+            cat_indices_te = np.where(x_test[:, cat_col] == val)
+            x_test_cat = x_test[cat_indices_te]
+            x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
+            yield y_train_cat, x_train_cat, x_test_cat, cat_indices_te
+        else:
+            yield y_train_cat, x_train_cat
+
+
 def train_predict_categories(y_train, x_train, x_test, model):
     """
     Creates the prediction vector for the provided data after normalizing using
@@ -51,16 +69,8 @@ def train_predict_categories(y_train, x_train, x_test, model):
     PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
-    for num in PRI_jet_nums:
-        cat_indices_tr = np.where(x_train[:, cat_col] == num)
-        x_train_cat = x_train[cat_indices_tr]
-        x_train_cat = np.delete(x_train_cat, cat_col, axis=1)
-        y_train_cat = y_train[cat_indices_tr]
-
-        cat_indices_te = np.where(x_test[:, cat_col] == num)
-        x_test_cat = x_test[cat_indices_te]
-        x_test_cat = np.delete(x_test_cat, cat_col, axis=1)
-
+    for cat_data in category_iter(y_train, x_train, cat_col, x_test):
+        y_train_cat, x_train_cat, x_test_cat, cat_indices_te = cat_data
         x_train_cat, x_test_cat = preprocess(x_train_cat, x_test_cat)
 
         predictions_cat = model.train(y_train_cat, x_train_cat)\
