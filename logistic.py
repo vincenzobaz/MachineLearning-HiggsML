@@ -139,8 +139,7 @@ class LogisticRegression:
         self.model = w
         self.losses = losses
         self.loss = losses[-1]
-        if niter < max_iter:
-            self.converged = True
+        self.converged = niter < max_iter
 
     def _gradient(self, y, tx):
         """Minimizes the loss function using gradient descent"""
@@ -162,8 +161,7 @@ class LogisticRegression:
         self.model = w
         self.losses = losses
         self.loss = losses[-1]
-        if niter < max_iter:
-            self.converged = True
+        self.converged = niter < max_iter
 
     def _sgd(self, y, tx):
         """Minimizes the loss function using gradient descent"""
