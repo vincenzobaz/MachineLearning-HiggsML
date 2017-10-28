@@ -103,7 +103,6 @@ class LogisticRegression:
         rest_ids = np.where(txw < critical_value)
         rest = np.sum(np.log(1 + np.exp(txw[rest_ids])) - y[rest_ids] * txw[rest_ids])
         return rest + postives
-        #return np.sum(np.log(1 + np.exp(txw)) - y * txw)
 
     @staticmethod
     def compute_gradient(y, tx, w):
