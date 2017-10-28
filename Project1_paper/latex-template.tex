@@ -2,6 +2,7 @@
 
 \usepackage{hyperref}
 \usepackage{graphicx}	% For figure environment
+\usepackage{bbm}
 
 
 \begin{document}
@@ -29,7 +30,26 @@ After diving into the dataset the first question that came to our attention was 
 Finally, on the advice of different TAs and the article \cite{anderson04}, we chose to train our model on each "categories" based on the numbers of jets (this is given by the column \textit{PRI\_jet\_num}). This is done with the \textit{category\_iter} function in the \textit{run.py} file.
 
 \subsection{Models}
+We implemented and compared different models, all of them are linear models. Therefore one of the parameter we had to tune was the degree of the model.
 
+To compare our models we used k-fold cross validation and computed the \textit{accuracy}. Given the real classification $\vec{y}$ and the predictions we computed $\vec{p}$, both of length $n$ we can simply compute the accuracy $$a(\vec{y}, \vec{p}) = n^{-1}\sum_{i=1}^n \mathbbm{1}\{y_i = p_i\}$$
+
+\subsubsection{Least squares}
+Our first attempt consisted in implementing a simple least squares model. As the size of the matrix is relatively small and our machines could inverse it quite easily, we only tried to use the matrix inverse and the pseudo-inverse.
+
+This means that given the data matrix $X$ and the prediction vector $\vec{y}$ we computed the weight vector $\vec{w}$ by
+$\vec{w} = X^{-1} \vec{y}$. As the matrix was often singular, we used the pseudo-inverse: $X = U \Sigma V^T$ and then
+$$\vec{w} = V \Sigma^{-1} U^T \vec{y}$$
+We were surprised by this method as our very first attempt with least squares (with degree 1) gave us an accuracy of $0.74463$.
+Least squares is implemented in least_squares.py
+
+\subsubsection{Logistic regression} After learning in the lectures about classification, we implemented logistic regression. Given the matrix data, we compute the probability that the point $\vec{x}$ is in category 1 by $\sigma(\vec{x}^T\vec{w})$ where $\sigma(t) = e^t (e^t + 1)^{-1}$. We do so by iteratively minimizing the loss function $$L(\vec{w}) = \sum^n_{i=1} \ln(1 + \exp{\vec{x}^T \vec{w}) - y_n \vec{x}^T\vec{w}$$
+As the gradient $\nabla L(\vec{w}) = X^T(\sigma(X\vec{w}) - y$ and the Hessian matrix $H_{L}(\vec{w}) = X^TSX$  (where $S_{nn} = \sigma(\vec{x}_n^T w)(1 - \sigma(\vec{x}_n^T\vec{w})$) of the loss function can be easily computed, we found our best results by using Newton's method for minimization which computes $$\vec{w}^{(t+1)} = \vec{w}^{(t)} - \gamma^{(t)} (H^{(t)})^{-1}\nabla L(\vec{w}^{(t)}$$
+
+Logistic regression is implemented in \textit{logistic.py} and uses minimizers defined in \textit{minimizers.py}
+
+\subsection{Preparing the data for learning}
+We performed the preparation of the data matrix before training. This consisted "applying" the degree of the model to the data: given the data matrix $D$, and the degree $d$ we obtained our matrix $X$ by concatenating a column of ones and the successive powers of $D$ : $$X = [\vec{1} D | D^1 | D^2 | \dots | D^d]$$
 
 \section{Results}
 
