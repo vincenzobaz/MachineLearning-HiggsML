@@ -1,6 +1,6 @@
 import numpy as np
 
-class Model_Ensembler:
+class ModelEnsembler:
 
     def __init__(self, models, meta_model):
         self.models = models
