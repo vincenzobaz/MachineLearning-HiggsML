@@ -4,7 +4,7 @@ import logistic
 import minimizers
 import implementations as imp
 from logistic import LogisticRegression
-from preprocessing import preprocess
+import preprocessing
 
 
 def polynomial_enhancement(x, deg):
@@ -20,8 +20,7 @@ def most_frequent(arr):
 
 def mean_spec(data):
     for column in data.T:
-        column[column == -999.0] = most_frequent(column)
-        """
+        #column[column == -999.0] = most_frequent(column)
         temp = 0
         agg = 0
         for elem in column:
@@ -30,7 +29,6 @@ def mean_spec(data):
                 agg += 1
         if agg != 0:
             column[column == -999.0] = temp / agg
-        """
 
 
 def standardize(x):
