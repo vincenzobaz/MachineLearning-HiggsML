@@ -34,7 +34,6 @@ def train_predict_categories(y_train, x_train, x_test, *models):
         if len(col) == 4 and np.allclose(np.arange(0, 4), col):
             cat_col = idx
 
-    PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
     for idx, cat_data in enumerate(category_iter(y_train, x_train, cat_col, x_test)):
