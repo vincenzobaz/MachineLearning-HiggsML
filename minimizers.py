@@ -14,17 +14,16 @@ def minimize(y, tx, init_arg, max_iter, threshold, step_f, loss_f):
               function.
     loss_f -- The loss function to minimize.
     """
-    #losses = []
-    losses = [np.inf]
+    losses = []
     prev_loss, next_loss = 0, np.inf
     niter = 0
     w = init_arg
 
-    while niter < max_iter: #and np.abs(prev_loss - next_loss) > threshold:
-        #prev_loss = next_loss
+    while niter < max_iter and np.abs(next_loss - prev_loss) > threshold:
+        prev_loss = next_loss
         w = step_f(y, tx, w)
-        #next_loss = loss_f(y, tx, w)
-        #losses.append(next_loss)
+        next_loss = loss_f(y, tx, w)
+        losses.append(next_loss)
         niter += 1
 
     return niter, losses, w
