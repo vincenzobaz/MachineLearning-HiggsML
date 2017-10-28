@@ -97,7 +97,13 @@ class LogisticRegression:
     def compute_loss(y, tx, w):
         """Computes loss using log-likelihood"""
         txw = tx @ w
-        return np.sum(np.log(1 + np.exp(txw)) - y * txw)
+        critical_value = np.float64(709.0)
+        overf = np.where(txw >= critical_value)
+        postives = np.sum(txw[overf] - y[overf] * txw[overf])
+        rest_ids = np.where(txw < critical_value)
+        rest = np.sum(np.log(1 + np.exp(txw[rest_ids])) - y[rest_ids] * txw[rest_ids])
+        return rest + postives
+        #return np.sum(np.log(1 + np.exp(txw)) - y * txw)
 
     @staticmethod
     def compute_gradient(y, tx, w):
@@ -133,6 +139,8 @@ class LogisticRegression:
         self.model = w
         self.losses = losses
         self.loss = losses[-1]
+        if niter < max_iter:
+            self.converged = True
 
     def _gradient(self, y, tx):
         """Minimizes the loss function using gradient descent"""
@@ -154,6 +162,8 @@ class LogisticRegression:
         self.model = w
         self.losses = losses
         self.loss = losses[-1]
+        if niter < max_iter:
+            self.converged = True
 
     def _sgd(self, y, tx):
         """Minimizes the loss function using gradient descent"""
@@ -179,3 +189,4 @@ class LogisticRegression:
         self.model = w
         self.losses = losses
         self.loss = losses[-1]
+
