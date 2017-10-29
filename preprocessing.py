@@ -45,4 +45,3 @@ def preprocess(x_tr, x_te=None):
         return x_train, x_test
     else:
         return x_train
-
