@@ -119,7 +119,7 @@ class LogisticRegression:
         """Minimizes the loss function using Newton's method"""
         # Retrieve parameters from kwargs or initialize defaults
         w = self.solver_args.get('w0', np.zeros((tx.shape[1], 1)))
-        max_iter = self.solver_args.get('max_iters', 400)
+        max_iter = self.solver_args.get('max_iters', 100)
         threshold = self.solver_args.get('threshold', 10**(-1))
         gamma = self.solver_args.get('gamma')
         lambda_ = self.solver_args.get('lambda_')
