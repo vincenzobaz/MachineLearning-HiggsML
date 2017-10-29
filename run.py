@@ -23,6 +23,11 @@ def category_iter(y_train, x_train, cat_col, x_test=None):
             yield y_train_cat, x_train_cat
 
 
+def repeater(x):
+    while True:
+        yield x
+
+
 def train_predict_categories(y_train, x_train, x_test, *models):
     """
     Creates the prediction vector for the provided data after normalizing using
@@ -35,6 +40,11 @@ def train_predict_categories(y_train, x_train, x_test, *models):
             cat_col = idx
 
     predictions = np.zeros(x_test.shape[0])
+
+    iterator = category_iter(y_train, x_train, cat_col, x_test)
+
+    if len(models) == 1:
+        models = repeater(models[0])
 
     for model, cat_data in zip(models, category_iter(y_train, x_train, cat_col, x_test)):
         y_train_cat, x_train_cat, x_test_cat, cat_indices_te = cat_data
