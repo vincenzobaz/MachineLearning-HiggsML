@@ -114,4 +114,3 @@ def learning_step(grad, w, tx, tests=100):
     # Compute for each learning rate, the "length" of move, to minimize.
     r = np.linalg.norm(tx @ (np.tile(w, tests) + np.outer(d, etas)), axis=0)
     return etas[np.argmin(r)] # Take etas that minimizes phi
-

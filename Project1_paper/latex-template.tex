@@ -24,7 +24,6 @@ TODO: at the end
 
 \section{Model and Methods}
 \label{sec:model}
-TODO: explain step chosen (what works, failed, why, using tables)
 \subsection{Preprocessing}
 After diving into the dataset the first question that came to our attention was what to do with the undefined values \textit{-999.0}. Three options came to mind, setting them to 0, to the average of every valid values in each feature or to the most frequent value in each feature. We opted for the second option as it seemed more coherent than the first one (although there wasn't any clear differences on the final accuracy result) and it turn out to be better than the last one when we cross validated our model. This is done by the \textit{mean\_spec} function in the \textit{preprocessing.py} file.\\ We then decided to standardize the dataset to avoid too big variations in its values. We implemented a classic standardization function, see \textit{stadardize} function in the \textit{preprocessing.py} file.\\ As we saw in class, linear models are not very rich, so we used the polynomial augmentation technique used in the lab session. This is realized by the \textit{polynomial\_enhancement} function in the \textit{preprocessing.py} file.\\
 Finally, on the advice of different TAs and the article \cite{anderson04}, we chose to train our model on each "categories" based on the numbers of jets (this is given by the column \textit{PRI\_jet\_num}). This is done with the \textit{category\_iter} function in the \textit{run.py} file.

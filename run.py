@@ -2,7 +2,7 @@ import numpy as np
 import scripts.proj1_helpers as helper
 
 from logistic import LogisticRegression
-from preprocessing import preprocess
+import preprocessing
 
 
 def category_iter(y_train, x_train, cat_col, x_test=None):
@@ -128,4 +128,3 @@ def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories
         print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
-
