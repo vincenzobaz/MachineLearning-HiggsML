@@ -29,8 +29,7 @@ def preprocess(x_tr, x_te=None):
     x_train = x_tr.copy()
 
     stds = np.std(x_train, axis=0)
-
-    deleted_cols_ids = np.where(stds < 0.7)
+    deleted_cols_ids = np.where(stds == 0)
 
     x_train = np.delete(x_train, deleted_cols_ids, axis=1)
     x_train = mean_spec(x_train)
