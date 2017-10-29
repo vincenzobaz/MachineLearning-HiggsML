@@ -41,16 +41,18 @@ This means that given the data matrix $X$ and the prediction vector $\vec{y}$ we
 $\vec{w} = X^{-1} \vec{y}$. As the matrix was often singular, we used the pseudo-inverse: $X = U \Sigma V^T$ and then
 $$\vec{w} = V \Sigma^{-1} U^T \vec{y}$$
 We were surprised by this method as our very first attempt with least squares (with degree 1) gave us an accuracy of $0.74463$.
-Least squares is implemented in least_squares.py
+Least squares is implemented in \textit{leastsquares.py}.
 
-\subsubsection{Logistic regression} After learning in the lectures about classification, we implemented logistic regression. Given the matrix data, we compute the probability that the point $\vec{x}$ is in category 1 by $\sigma(\vec{x}^T\vec{w})$ where $\sigma(t) = e^t (e^t + 1)^{-1}$. We do so by iteratively minimizing the loss function $$L(\vec{w}) = \sum^n_{i=1} \ln(1 + \exp{\vec{x}^T \vec{w}) - y_n \vec{x}^T\vec{w}$$
+\subsubsection{Logistic regression} After learning in the lectures about classification, we implemented logistic regression. Given the matrix data, we compute the probability that the point $\vec{x}$ is in category 1 by $\sigma(\vec{x}^T\vec{w})$ where $\sigma(t) = e^t (e^t + 1)^{-1}$. We do so by iteratively minimizing the loss function
+$$L(\vec{w}) = \sum^n_{i=1} \ln(1 + \exp{\vec{x}^T \vec{w}}) - y_n \vec{x}^T\vec{w}$$
 As the gradient $\nabla L(\vec{w}) = X^T(\sigma(X\vec{w}) - y$ and the Hessian matrix $H_{L}(\vec{w}) = X^TSX$  (where $S_{nn} = \sigma(\vec{x}_n^T w)(1 - \sigma(\vec{x}_n^T\vec{w})$) of the loss function can be easily computed, we found our best results by using Newton's method for minimization which computes $$\vec{w}^{(t+1)} = \vec{w}^{(t)} - \gamma^{(t)} (H^{(t)})^{-1}\nabla L(\vec{w}^{(t)}$$
 
 Logistic regression is implemented in \textit{logistic.py} and uses minimizers defined in \textit{minimizers.py}
 
 \subsection{Preparing the data for learning}
-We performed the preparation of the data matrix before training. This consisted "applying" the degree of the model to the data: given the data matrix $D$, and the degree $d$ we obtained our matrix $X$ by concatenating a column of ones and the successive powers of $D$ : $$X = [\vec{1} D | D^1 | D^2 | \dots | D^d]$$
+We performed the preparation of the data matrix before training. This consisted "applying" the degree of the model to the data: given the data matrix $D$, and the degree $d$ we obtained our matrix $X$ by concatenating a column of ones and the successive powers of $D$ : $$X = [\vec{1} | D | D^1 | D^2 | \dots | D^d]$$
 
+\subsection{Parameter tuning}
 \section{Results}
 
 TODO: I guess best results we got and the exact technics and parameters, give exact loss (mean of cross validation maybe)
