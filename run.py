@@ -2,7 +2,7 @@ import numpy as np
 import scripts.proj1_helpers as helper
 
 from logistic import LogisticRegression
-import preprocessing
+from preprocessing import preprocess
 
 
 def category_iter(y_train, x_train, cat_col, x_test=None):
@@ -118,7 +118,10 @@ def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories
         predictions = train_predict_f(train_y, train_x, test_x)
 
         # Compute and return accuracy
-        return np.sum(test_y == predictions) / len(predictions)
+        accuracy = np.array([label == test_y[i] for i, label in enumerate(predictions)])
+        accuracy = np.sum(accuracy) / accuracy.size
+
+        return accuracy
 
     accuracy = []
 
