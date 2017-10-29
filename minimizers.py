@@ -102,13 +102,13 @@ def gradient_descent_step(y, tx, w, compute_gradient, gamma, lambda_):
     regularizer = lambda_ * np.linalg.norm(w) if lambda_ is not None else 0
     return w - gamma * compute_gradient(y, tx, w) + regularizer
 
+
 def learning_step(grad, w, tx, tests=100):
     """
     Provides a good learning step eta for the current iteration of Newton's method
     by taking the value in np.linspace(0, 1, tests) which minimzes the norm
     of phi(eta) = f(w + eta * d)
     """
-    print('should not be here')
     d = grad / np.linalg.norm(grad) # Compute direction vector
     etas = np.linspace(0, 1, tests+1)[1:] # Learning rates to test
     # Compute for each learning rate, the "length" of move, to minimize.

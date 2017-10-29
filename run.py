@@ -1,38 +1,8 @@
 import numpy as np
 import scripts.proj1_helpers as helper
-import logistic
-import minimizers
-import implementations as imp
+
 from logistic import LogisticRegression
 import preprocessing
-
-
-def polynomial_enhancement(x, deg):
-    stacked_x = np.tile(x, deg)
-    power_vec = np.repeat(np.array(range(1, deg + 1)), x.shape[1])
-    return np.hstack((np.ones((stacked_x.shape[0], 1)), stacked_x ** power_vec))
-
-
-def most_frequent(arr):
-    _, counts = np.unique(arr, return_counts=True)
-    return np.argmax(counts)
-
-
-def mean_spec(data):
-    for column in data.T:
-        #column[column == -999.0] = most_frequent(column)
-        temp = 0
-        agg = 0
-        for elem in column:
-            if elem != -999.0:
-                temp += elem
-                agg += 1
-        if agg != 0:
-            column[column == -999.0] = temp / agg
-
-
-def standardize(x):
-    return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
 def category_iter(y_train, x_train, cat_col, x_test=None):
@@ -53,7 +23,7 @@ def category_iter(y_train, x_train, cat_col, x_test=None):
             yield y_train_cat, x_train_cat
 
 
-def train_predict_categories(y_train, x_train, x_test, model):
+def train_predict_categories(y_train, x_train, x_test, *models):
     """
     Creates the prediction vector for the provided data after normalizing using
     logistic regression. The data is split and trained in different categories
@@ -64,10 +34,9 @@ def train_predict_categories(y_train, x_train, x_test, model):
         if len(col) == 4 and np.allclose(np.arange(0, 4), col):
             cat_col = idx
 
-    PRI_jet_nums = np.unique(x_train[:, cat_col])
     predictions = np.zeros(x_test.shape[0])
 
-    for cat_data in category_iter(y_train, x_train, cat_col, x_test):
+    for model, cat_data in zip(models, category_iter(y_train, x_train, cat_col, x_test)):
         y_train_cat, x_train_cat, x_test_cat, cat_indices_te = cat_data
         x_train_cat, x_test_cat = preprocess(x_train_cat, x_test_cat)
 
@@ -78,7 +47,7 @@ def train_predict_categories(y_train, x_train, x_test, model):
     return predictions
 
 
-def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_categories, seed=1):
+def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories, seed=1):
     """
     Computes weights, training and testing error
 
@@ -107,7 +76,7 @@ def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_cat
         train_indices = np.ravel(train_indices)
         train_x, train_y = x[train_indices], y[train_indices]
 
-        predictions = train_predict_f(train_y, train_x, test_x, model)
+        predictions = train_predict_f(train_y, train_x, test_x)
 
         su = 0
         for i in range(len(predictions)):
@@ -123,4 +92,3 @@ def best_cross_validation(y, x, k_fold, model, train_predict_f=train_predict_cat
         print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
-

@@ -1,7 +1,7 @@
 import numpy as np
 import implementations as imp
-from preprocessor import EmptyPreprocessor
-import run as run
+from preprocessing import polynomial_enhancement
+
 
 class LeastSquares:
     def __init__(self, degree=1, solver='pseudo', **kwargs):
@@ -30,7 +30,7 @@ class LeastSquares:
 
     def train(self, y, x):
         """Trains the model on the provided x,y data"""
-        processed = run.polynomial_enhancement(x, self.degree)
+        processed = polynomial_enhancement(x, self.degree)
         y = np.reshape(y, (len(y), 1))
 
         # Switch statement à-la python
@@ -43,7 +43,7 @@ class LeastSquares:
 
     def predict(self, x_test):
         """Predicts y values for the provided test data"""
-        ready = run.polynomial_enhancement(x_test, self.degree)
+        ready = polynomial_enhancement(x_test, self.degree)
         return ready @ self.model
 
     def predict_labels(self, x_test):
