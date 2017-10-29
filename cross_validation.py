@@ -27,7 +27,6 @@ def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
         test_x, test_y = x[k_indices[k]], y[k_indices[k]]
         train_indices = k_indices[[i for i in range(len(k_indices)) if i != k]]
         train_indices = np.ravel(train_indices)
-        # tx = polynomial_enhancement(x[train_indices], degree)
         model.train(y[train_indices], x[train_indices])
 
         predicted_raw_labels = model.predict_labels(test_x)

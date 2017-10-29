@@ -128,6 +128,6 @@ def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories
     for i in range(k_fold):
         tmp_accuracy = cross_validation_step(i)
         accuracy.append(tmp_accuracy)
-        print('Executed step', i+1, '/', k_fold, 'of cross validation')
+        #print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
