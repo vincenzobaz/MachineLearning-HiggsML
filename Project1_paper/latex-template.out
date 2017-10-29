@@ -1,10 +1,10 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Model and Methods}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Preprocessing}{section.2}% 3
-\BOOKMARK [2][-]{subsection.2.2}{Models}{section.2}% 4
-\BOOKMARK [3][-]{subsubsection.2.2.1}{Least squares}{subsection.2.2}% 5
-\BOOKMARK [3][-]{subsubsection.2.2.2}{Logistic regression}{subsection.2.2}% 6
-\BOOKMARK [2][-]{subsection.2.3}{Preparing the data for learning}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.2}{Preparing the data for learning}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Models}{section.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Least squares}{subsection.2.3}% 6
+\BOOKMARK [3][-]{subsubsection.2.3.2}{Logistic regression}{subsection.2.3}% 7
 \BOOKMARK [2][-]{subsection.2.4}{Parameter tuning}{section.2}% 8
 \BOOKMARK [1][-]{section.3}{Results}{}% 9
 \BOOKMARK [1][-]{section.4}{Summary}{}% 10
