@@ -4,6 +4,9 @@
 
 To generate a `predictions.csv` file, just execute `run.py`.
 
+The script looks for a file named `train.csv` in the current folder to train
+and computes predictions for data in `test.csv`.
+
 ## Code Organization
 
 We organized our codebase using several files:
