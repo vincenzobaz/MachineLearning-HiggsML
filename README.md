@@ -18,7 +18,6 @@ We organized our codebase using several files:
  - `minimizers.py` contains functions used for iterative minimization. In particular
     it contains modularized and documented code for gradient descent and
     Newton's method.
- - `model_ensembler.py`
  - `cross_validation.py` contains the function necessary to cross validate a
    given model.
  - `run.py` is the execution script.
