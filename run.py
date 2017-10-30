@@ -99,5 +99,5 @@ if __name__ == "__main__":
     predictions[predictions == 0] = -1
 
     # Export results
-    helper.create_csv_submission(ids_test, predictions, 'final_submission.csv')
+    helper.create_csv_submission(ids_test, predictions, 'predictions.csv')
 
