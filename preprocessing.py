@@ -12,8 +12,8 @@ def polynomial_enhancement(x, deg):
 
 def most_frequent(arr):
     """Returns the most frequent element of arr"""
-    _, counts = np.unique(arr, return_counts=True)
-    return np.argmax(counts)
+    values, counts = np.unique(arr, return_counts=True)
+    return values[np.argmax(counts)]
 
 
 def mean_spec(data):
@@ -52,3 +52,4 @@ def preprocess(x_tr, x_te=None):
         return x_train, x_test
     else:
         return x_train
+
