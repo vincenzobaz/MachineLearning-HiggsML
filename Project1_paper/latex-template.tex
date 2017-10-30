@@ -20,7 +20,7 @@
 
 \section{Introduction}
 
-TODO: at the end
+The purpose of this first Machine Learning project was for us to find the model that will predict best the signal of a Higgs Boson. In this paper we will present the models and methods we used, the preprocessing we have done, the implementation and give justification for the parameters we chose. We will then explain our results and conclude on what could be improved from here.
 
 \section{Model and Methods}
 \label{sec:model}
@@ -107,9 +107,11 @@ and acceptable loss.
 
 $\gamma = 0.1$ and the optimal degrees for logistic regression by category gave us our best score on Kaggle: $0.82706$:
 
+\begin{samepage}
 \section{Summary}
 
 We tried different linear models under different conditions and parameters and finally concluded that logistic regression produced the best results for this particular challenge. There were some improvements that we considered but we did not have to time to implement them correctly, like model-ensembling or training models separately over clusters of data points located either with a simple PCA or a more  advanced clustering algorithm.
+\end{samepage}
 
 \newpage
 \bibliographystyle{IEEEtran}
