@@ -1,13 +1,18 @@
 import numpy as np
-import implementations as imp
 
-def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
+
+def cross_validation(y, x, k_fold, train_predict_f, seed=1):
     """
-    Computes weights, training and testing error
-    regression_f is a regressiong function only accepting y and the tx matrix.
-    In case of ridge regression (or any other function needing more paremeters),
-    the additional ones can be curried.
-    e.g. f = lambda y, tx: ridge_regression(y, tx, lambda_, compute_loss=...)
+    Computes the accuracy of the train_predict_f function using k-fold cross
+    validation.
+
+    Keyword arguments:
+    y -- The known predictions.
+    x -- The data points associated to y predictions.
+    k-fold -- The number of folds.
+    train_predict_f -- The function used to train and predict the data. It
+                       trains on y_train, x_train and predicts for  x_test.
+    seed -- seed for the random generator used to split the data.
     """
 
     def build_k_indices():
@@ -24,31 +29,29 @@ def cross_validation(y, x, k_fold, model, seed=1, compute_loss=imp.rmse):
 
     def cross_validation_step(k):
         """Computes one iteration of k-fold cross validation"""
+        # Split test data
         test_x, test_y = x[k_indices[k]], y[k_indices[k]]
+
+        # Split training data
         train_indices = k_indices[[i for i in range(len(k_indices)) if i != k]]
         train_indices = np.ravel(train_indices)
-        model.train(y[train_indices], x[train_indices])
+        train_x, train_y = x[train_indices], y[train_indices]
 
-        predicted_raw_labels = model.predict_labels(test_x)
+        # Predict
+        predictions = train_predict_f(train_y, train_x, test_x)
 
-        accuracy = np.array([label == test_y[i] for i, label in enumerate(predicted_raw_labels)])
+        # Compute and return accuracy
+        accuracy = np.array([prediction == real for prediction, real in zip(predictions, test_y)])
         accuracy = np.sum(accuracy) / accuracy.size
-        print(accuracy)
 
-        #loss_te = compute_loss(test_y, polynomial_enhancement(test_x, degree), w)
         return accuracy
 
-    loss_tr = []
-    loss_te = []
-    weigths = []  # if quadratic, three parameters....
     accuracy = []
 
     for i in range(k_fold):
-        print('Step', i + 1, '/', k_fold)
         tmp_accuracy = cross_validation_step(i)
-        # loss_tr.append(tmp_loss_tr)
-        # loss_te.append(tmp_loss_te)
         accuracy.append(tmp_accuracy)
-        # weigths.append(w)
+        #print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
+
