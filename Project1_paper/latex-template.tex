@@ -55,7 +55,7 @@ As the gradient $\nabla L(\vec{w}) = X^T(\sigma(X\vec{w}) - y$ and the Hessian m
 Logistic regression is implemented in \textit{logistic.py} and uses minimizers defined in \textit{minimizers.py}. Using this implementation of logistic regression we improved our accuracy to $0.81632$, testing it on a 5-fold cross validation with a degree 4 and the gamma parameter set to $0.1$. We trained this model on every different category, as we did for Least Squares, and again obtained a better score of $0.82685350422$.
 
 \subsection{Parameter tuning}
-To select the best parameters for our models (the degree of enhancement and the gamma of the newton method) we ran a grid search over the cross validation with a fair range for those parameters. We found out that the best degree for Least Square was 8 and 5 for the Logistic regression.
+To select the best parameters for our models (the degree of enhancement and the gamma of the newton method) we ran a grid search over the cross validation with a fair range for those parameters. We found out that the best degree for Least Square was 8 and 5 for the Logistic regression on the complete data matrix (see figure 1 and 2).
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\columnwidth]{ls_deg}
@@ -71,6 +71,21 @@ To select the best parameters for our models (the degree of enhancement and the 
   \label{fig:denoise-fourier}
 \end{figure}
 
+For the training by categories we look for the best parameters for each category and found out that it was degrees [7, 11, 11, 9] and [3, 6, 6, 6] for Least Squares and Logistic regression respectively. (see figure 3 and 4).
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\columnwidth]{ls_cat_deg}
+  \caption{Grid search on degrees for Logistic Regression on each category.}
+  \vspace{-3mm}
+  \label{fig:denoise-fourier}
+\end{figure}
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\columnwidth]{lr_cat_deg}
+  \caption{Grid search on degrees for Logistic Regression on each category.}
+  \vspace{-3mm}
+  \label{fig:denoise-fourier}
+\end{figure}
 \section{Results}
 
 Once we tested those models with different set-ups we kept the best possible which turned out to be the Logistic regression by categories with the degrees [3, 6, 6, 6] for category [0, 1, 2, 3] and the gamma parameter 0.1, giving us the score of 0.82706 on Kaggle.
@@ -79,6 +94,7 @@ Once we tested those models with different set-ups we kept the best possible whi
 
 To conclude we tried different linear models seen in class under different conditions and the Logistic regression came out the best for this particular challenge. There was some other amelioration we though about but we did not have to time to implement correctly, like model-ensemble or training our model on clusters of data.
 
+\newpage
 \bibliographystyle{IEEEtran}
 \bibliography{literature}
 
