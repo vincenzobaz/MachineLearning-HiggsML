@@ -78,9 +78,14 @@ def sigmoid(t):
 
 def compute_logistic_loss(y, tx, w):
     """Computes loss using log-likelihood"""
-
+    # Refer to README for explanation
     txw = tx @ w
-    return np.sum(np.log(1 + np.exp(txw)) - y * txw)
+    critical_value = np.float64(709.0)
+    overf = np.where(txw >= critical_value)
+    approx = np.sum(txw[overf] - y[overf] * txw[overf])
+    rest_ids = np.where(txw < critical_value)
+    normal = np.sum(np.log(1 + np.exp(txw[rest_ids])) - y[rest_ids] * txw[rest_ids])
+    return normal + approx
 
 
 def compute_logistic_gradient(y, tx, w):
