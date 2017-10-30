@@ -118,7 +118,7 @@ def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories
         predictions = train_predict_f(train_y, train_x, test_x)
 
         # Compute and return accuracy
-        accuracy = np.array([label == test_y[i] for i, label in enumerate(predictions)])
+        accuracy = np.array([prediction == real for prediction, real in zip(predictions, test_y)])
         accuracy = np.sum(accuracy) / accuracy.size
 
         return accuracy
@@ -131,3 +131,28 @@ def best_cross_validation(y, x, k_fold, train_predict_f=train_predict_categories
         #print('Executed step', i+1, '/', k_fold, 'of cross validation')
 
     return accuracy
+
+
+if __name__ == "__main__":
+    # Import data
+    y_train, x_train, ids_train = helper.load_csv_data('train.csv')
+    y_test, x_test, ids_test = helper.load_csv_data('test.csv')
+    y_train[y_train < 0] = 0
+
+    # Define 1 model per category
+    models = [
+        LogisticRegression(degree=3, gamma=0.1),
+        LogisticRegression(degree=6, gamma=0.1),
+        LogisticRegression(degree=6, gamma=0.1),
+        LogisticRegression(degree=6, gamma=0.1)
+    ]
+
+    # Train and predict
+    predictions = train_predict_categories(y_train, x_train, x_test, *models)
+
+    # Prepare for export
+    predictions[predictions == 0] = -1
+
+    # Export results
+    helper.create_csv_submission(ids_test, predictions, 'final_submission.csv')
+
