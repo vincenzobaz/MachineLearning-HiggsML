@@ -41,6 +41,9 @@ class Model:
 
     def predict(self, x_test):
         pass
+
+    def predict(self, x_test):
+        pass
 ```
 
 `solver` is the strategy used to minimize/solve the problem. For example
