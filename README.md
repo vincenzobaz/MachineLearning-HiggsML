@@ -42,7 +42,7 @@ class Model:
     def predict(self, x_test):
         pass
 
-    def predict(self, x_test):
+    def predict_labels(self, x_test):
         pass
 ```
 
