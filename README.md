@@ -109,7 +109,7 @@ functions to each element of the `t` vector according to the element's sign:
  - If `t_i` is positive then we apply `1 / (1 + np.exp(-t))`
  - If `t_i` is negative we apply the classical `np.exp(t) / (1 + np.exp(t))`
 
-## The logistic loss function
+### The logistic loss function
 While the previous cases produce the exact result, in this one we had to approximate.
 
 The `LinearRegression.compute_loss` often resulted in overflows (returning `np.inf`)
